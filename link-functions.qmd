@@ -1,0 +1,68 @@
+---
+title: "boh"
+authors: "Laura Sità"
+format:
+  revealjs:
+    center: true
+    embed-resources: true
+    slide-number: true
+    footer: "CSA data, 2026"
+    theme: night
+    output-file: "link-functions.html"
+toc: true
+execute:
+  cache: false
+  freeze: false
+include-in-header:
+  - text: |
+      <style>
+      /* Titolo slide di copertina */
+      #title-slide .title {
+        font-size: 1.5em;
+       <!-- color: #900000; --> 
+      }
+
+      /* Logo nella copertina */
+      #title-slide::after {
+        content: "";
+        display: block;
+        background-image: url("images/logo.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        height: 250px;
+        margin-top: 1.5em;
+      }
+
+      /* Titoli interni delle slide */
+      .reveal h1, .reveal h2, .reveal h3 {
+      <!--  color: #900000 !important; -->
+      }
+
+      /* Dimensione leggermente minore per h2 */
+      .reveal h2 {
+        font-size: 1.2em !important;
+      }
+
+      /* testo giustificato */
+      .reveal p, .reveal li {
+        text-align: justify !important;
+        text-justify: inter-word;
+      }
+
+      /* footer centrato */
+       .reveal .slide-footer,
+      .reveal .footer,
+      .reveal .revealjs-footer {
+        position: fixed; left: 0; right: 0; bottom: 10px;
+        width: 100%;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      </style>
+  
+---
+
+# prima slide
