@@ -1,12 +1,12 @@
 ---
-title: "boh"
-authors: "Laura Sità"
+title: "Are we getting interactions wrong? <br> The role of link functions <br> in psychological research"
+authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, Filippo Gambarota, Enrico Toffalini"
 format:
   revealjs:
     center: true
     embed-resources: true
     slide-number: true
-    footer: "CSA data, 2026"
+    footer: "Cognitive Science Arena data, 2026"
     theme: night
     output-file: "link-functions.html"
 toc: true
@@ -62,7 +62,24 @@ include-in-header:
         text-align: center !important;
       }
       </style>
-  
 ---
 
 # prima slide
+
+```{r source}
+#| echo: false
+#| include: false
+source("R/datasim.R")
+```
+
+dal qr link alla repo: scaricare il file `R/datasim.R` per chi vuole provare a simulare le cose in tempo reale
+
+# Materials & Contact
+
+All materials are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
+
+Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
+
+![](images/logo.png){fig-align="center" width="2.4cm"}
+
+# Bibliography
