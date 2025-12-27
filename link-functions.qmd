@@ -71,8 +71,12 @@ include-in-header:
 #| include: false
 source("R/datasim.R")
 ```
+per chi vuole provare a simulare le cose in tempo reale
 
-dal qr link alla repo: scaricare il file `R/datasim.R` per chi vuole provare a simulare le cose in tempo reale
+qr code che manda a questo link 
+https://github.com/sitalaura/link-functions/tree/main/R
+
+oppure scaricare il file a questo percorso `sitalaura.github.io/link-functions/R/datasim.R` 
 
 # Materials & Contact
 
