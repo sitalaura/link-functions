@@ -6,8 +6,8 @@ format:
     center: true
     embed-resources: true
     slide-number: true
-    footer: "Cognitive Science Arena data, 2026"
-    theme: night
+    footer: "Cognitive Science Arena 2026"
+    # theme: night
     output-file: "link-functions.html"
 toc: true
 execute:
@@ -78,6 +78,170 @@ https://github.com/sitalaura/link-functions/tree/main/R
 
 oppure scaricare il file a questo percorso `sitalaura.github.io/link-functions/R/datasim.R` 
 
+# Example
+independent variable: age in years (`years`)
+
+dependent variable: mistakes in a reading task (`errors`)
+
+**aggiungi screenshot dataset**
+
+# 1 Errors with linear predictor
+using the classical linear predictor
+```{r fitL}
+#| echo: true
+#| eval: false
+fitL = glm(y~age, data=d)
+```
+
+# 1 Errors with linear predictor SHOW CODE
+
+```{r}
+#| echo: false
+fitL = glm(y~age, data=d)
+effL = data.frame(allEffects(fitL,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
+ggplot(d,aes(x=age,y=y))+
+  coord_cartesian(ylim=c(-0.4,max(y))) +
+  geom_point(size=4,alpha=.5,color="darkblue")+
+  geom_line(data=effL,aes(y=fit),size=2,color="darkred")+
+  geom_ribbon(data=effL,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="darkred")+
+  theme(text=element_text(size=ts,color="black"))+
+  scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
+  ylab("Errors")+xlab("Age (years)")
+```
+
+# 2 Errors with appropriate model
+using the appropriate distribution `family=poisson`
+
+but, most importantly, **the appropriate link `link="log"`**
+
+```{r fitLg}
+#| echo: true
+#| eval: false
+fitP = glm(y~age, family=poisson(link="log"), data=d)
+```
+
+# 2 Errors with appropriate model SHOW CODE
+
+```{r ciao1}
+fitP = glm(y~age, family=poisson(link="log"), data=d)
+
+effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
+ggplot(d,aes(x=age,y=y))+
+  coord_cartesian(ylim=c(-0.4,max(y))) +
+  geom_point(size=4,alpha=.5,color="darkblue")+
+  geom_line(data=effP,aes(y=fit),size=2,color="blue")+
+  geom_ribbon(data=effP,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="blue")+
+  #geom_line(data=effL,aes(y=fit),size=2,color="darkred")+
+  #geom_ribbon(data=effL,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="darkred")+
+  theme(text=element_text(size=ts,color="black"))+
+  scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
+  ylab("Errors")+xlab("Age (years)")
+```
+
+# 3 con effetto interazione
+independent variable: age in years (`years`)
+
+dependent variable: mistakes in a reading task (`errors`)
+
+::: {.fragment}
+**adding a new main effect**
+
+groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
+:::
+
+# 4 interaction with linear model
+an interaction would emerge with a classical linear model (commenta l'output)
+```{r fitL_1}
+#| echo: true
+#| include: true
+#| warning: true
+fitL_0 = glmmTMB(y ~ age + group + (1|id), data=d)
+fitL_1 = glmmTMB(y ~ age * group + (1|id), data=d)
+anova(fitL_0, fitL_1)
+```
+
+# 4 interaction with linear model SHOW CODE
+
+```{r ciao}
+ts <- 16
+tc <- "black"
+
+eff_obj <- allEffects(
+  fitL_1,
+  xlevels = list(age = seq(min(d$age), max(d$age), .05))
+)[["age:group"]]
+
+effL <- as.data.frame(eff_obj)
+
+# garantisci colonna fit
+if (!("fit" %in% names(effL))) {
+  pred_col <- intersect(c("fit", "response", "fitted", "yhat"), names(effL))
+  if (length(pred_col) == 0)
+    stop("Nessuna colonna di predizione trovata in effL.")
+  effL$fit <- effL[[pred_col[1]]]
+}
+
+ggplot(d, aes(x = age, y = y, shape = group, color = group)) +
+  geom_point(size = 4, alpha = .6) +
+  geom_ribbon(
+    data = effL,
+    aes(x = age, ymin = lower, ymax = upper, fill = group, group = group),
+    alpha = .3,
+    color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effL,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = c("darkorange3", "darkgreen")) +
+  scale_fill_manual(values = c("darkorange3", "darkgreen")) +
+  theme(text = element_text(size = ts, color = tc)) +
+  scale_x_continuous(breaks = seq(6, 10, .5)) +
+  labs(y = "Errors", x = "Age (years)")
+
+```
+
+# 5 interaction with link log
+
+no interaction ! 
+
+```{r fitL_log_1}
+#| echo: true
+#| include: true
+#| warning: false
+fitP_0 = glmmTMB(y ~ age + group + (1|id), family=poisson(link="log"), data=d)
+fitP_1 = glmmTMB(y ~ age * group + (1|id), family=poisson(link="log"), data=d)
+anova(fitP_0, fitP_1)
+```
+
+# 5 interaction with link log SHOW CODE
+```{r ciao2}
+fitP = glm(y~age*group, family=poisson(link="log"), data=d)
+effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age:group")
+effP$group = as.factor(effP$group)
+ggplot(d,aes(x=age,y=y,shape=group,color=group))+
+  geom_point(size=4,alpha=.6)+
+  scale_color_manual(values=c("darkorange2","darkgreen"))+
+  scale_fill_manual(values=c("darkorange1","darkgreen"))+
+  geom_line(data=effP,aes(x=age,y=fit,group=group,linetype=group),size=2)+
+  geom_ribbon(data=effP,aes(x=age,y=fit,ymin=lower,ymax=upper,group=group,fill=group),alpha=.3,color=NA)+
+  theme(text=element_text(size=ts,color="black"))+scale_x_continuous(breaks=seq(0,20,.5))+
+  ylab("Errors")+xlab("Age (years)")
+
+```
+
+
+# infatti
+type I error arriva da 0.05 a 50% sulle interazioni con la link function sbagliata
+show code (da fare)
+grafico
+
+# Conclusions
+conclusioni
+
 # Materials & Contact
 
 All materials are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
@@ -87,3 +251,29 @@ Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_
 ![](images/logo.png){fig-align="center" width="2.4cm"}
 
 # Bibliography
+
+# Supplementary materials 
+
+## wrong family doesnt create issues
+if we put the wrong family, but the correct link `family=gaussian(link="log")` 
+still no interaction (as it should)
+
+```{r sup1a}
+#| echo: false
+#| eval: true
+b0 <- log(mean(d$y))
+```
+
+
+```{r sup1b}
+#| echo: true
+#| include: true
+#| warning: false
+
+fitL_log_0 <- glmmTMB(y ~ age + group + (1|id), family = gaussian(link="log"), data=d, start=list(beta=c(b0, 0, 0)))
+
+fitL_log_1 <- glmmTMB(y ~ age * group + (1|id), family = gaussian(link="log"), data=d, start=list(beta=c(b0, 0, 0, 0)))
+
+anova(fitL_log_0, fitL_log_1)
+```
+
