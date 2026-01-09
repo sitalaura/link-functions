@@ -1,6 +1,6 @@
 ---
 title: "Are we getting interactions wrong? <br> The role of link functions <br> in psychological research"
-authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, Filippo Gambarota, Enrico Toffalini"
+authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, <br> Filippo Gambarota, Enrico Toffalini"
 format:
   revealjs:
     center: true
@@ -64,7 +64,7 @@ include-in-header:
       </style>
 ---
 
-# prima slide
+#
 
 ```{r source}
 #| echo: false
@@ -78,14 +78,60 @@ https://github.com/sitalaura/link-functions/tree/main/R
 
 oppure scaricare il file a questo percorso `sitalaura.github.io/link-functions/R/datasim.R` 
 
-# Example
+# 1 Example
+
+## Simulated dataset 1
 independent variable: age in years (`years`)
 
-dependent variable: mistakes in a reading task (`errors`)
+dependent variable: (`variabile`)
 
 **aggiungi screenshot dataset**
 
-# 1 Errors with linear predictor
+## Linear model 
+using the classical linear predictor
+```{r ex1fitL}
+#| echo: true
+#| eval: false
+fitL = glm(y~age, data=d)
+```
+
+## Linear model
+
+what we dont see it bc its a default parameter but its actually hidden in our code:
+
+```{r fitL-link}
+#| echo: true
+#| eval: false
+#| code-fold: true
+fitL_explicit = glm(y~age, family=gaussian(link="identity"), data=d)
+```
+
+::: {.fragment}
+the model uses family gaussian and the identity link function
+:::
+
+::: {.fragment}
+**link function** in GLMs transforms (re-map) the linear predictor X
+
+to the appropriate range of the response variable Y
+:::
+
+
+## identity link 
+equal intervals on X correspond to equal intervals on Y
+
+PLOT DELLA RETTA su x ed y metti i nomi delle variabili dell'esempio 
+
+# 2 Example 
+
+## Simulated dataset 2
+independent variable: age in years (`years`)
+
+dependent variable: mistakes in a reading task (`errors`) 
+
+**aggiungi screenshot dataset**
+
+## Linear model 
 using the classical linear predictor
 ```{r fitL}
 #| echo: true
@@ -93,10 +139,10 @@ using the classical linear predictor
 fitL = glm(y~age, data=d)
 ```
 
-# 1 Errors with linear predictor SHOW CODE
-
-```{r}
-#| echo: false
+## Linear model
+```{r fitL-plot}
+#| echo: true
+#| code-fold: true
 fitL = glm(y~age, data=d)
 effL = data.frame(allEffects(fitL,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
 ggplot(d,aes(x=age,y=y))+
@@ -108,21 +154,44 @@ ggplot(d,aes(x=age,y=y))+
   scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
   ylab("Errors")+xlab("Age (years)")
 ```
+## wrong link (and wrong family)
 
-# 2 Errors with appropriate model
+IN THE FIRST EXAMPLE an identity link was appropriate bc 
+
+- x (`years`) spans from -inf to +inf
+
+- y (`boh`) spans from -inf to +inf
+
+::: {.fragment}
+here an identity link is NOT appropriate bc 
+
+- x (`years`) spans from -inf to +inf
+
+- y (`errors`) spans from 0 to +inf
+:::
+
+## link log
+equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
+
+PLOT DEL LOGARITMO (O QUELLO APPROPRIATO CON L'ESEMPIO) su x ed y metti i nomi delle variabili dell'esempio 
+
+## Appropriate model
 using the appropriate distribution `family=poisson`
 
-but, most importantly, **the appropriate link `link="log"`**
+and **the appropriate link `link="log"`**
 
-```{r fitLg}
+```{r fitP}
 #| echo: true
 #| eval: false
 fitP = glm(y~age, family=poisson(link="log"), data=d)
 ```
 
-# 2 Errors with appropriate model SHOW CODE
+## Appropriate model
 
-```{r ciao1}
+```{r fitP-plot}
+#| echo: true
+#| code-fold: true
+
 fitP = glm(y~age, family=poisson(link="log"), data=d)
 
 effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
@@ -137,8 +206,10 @@ ggplot(d,aes(x=age,y=y))+
   scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
   ylab("Errors")+xlab("Age (years)")
 ```
+# 3 Adding an interaction
 
-# 3 con effetto interazione
+## Simulated dataset 2
+
 independent variable: age in years (`years`)
 
 dependent variable: mistakes in a reading task (`errors`)
@@ -149,9 +220,13 @@ dependent variable: mistakes in a reading task (`errors`)
 groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
 :::
 
-# 4 interaction with linear model
+## Interaction with link identity
 an interaction would emerge with a classical linear model (commenta l'output)
-```{r fitL_1}
+il link è quello identico mettilo nel codice
+
+using the wrong link 
+
+```{r fitL_01}
 #| echo: true
 #| include: true
 #| warning: true
@@ -160,9 +235,12 @@ fitL_1 = glmmTMB(y ~ age * group + (1|id), data=d)
 anova(fitL_0, fitL_1)
 ```
 
-# 4 interaction with linear model SHOW CODE
+## Interaction with link identity
 
-```{r ciao}
+```{r fitL_01-plot}
+#| echo: true
+#| code-fold: true
+
 ts <- 16
 tc <- "black"
 
@@ -204,11 +282,11 @@ ggplot(d, aes(x = age, y = y, shape = group, color = group)) +
 
 ```
 
-# 5 interaction with link log
+## Interaction with link log
 
-no interaction ! 
+no significant interaction using the correct link
 
-```{r fitL_log_1}
+```{r fitP_01}
 #| echo: true
 #| include: true
 #| warning: false
@@ -217,8 +295,11 @@ fitP_1 = glmmTMB(y ~ age * group + (1|id), family=poisson(link="log"), data=d)
 anova(fitP_0, fitP_1)
 ```
 
-# 5 interaction with link log SHOW CODE
-```{r ciao2}
+## Interaction with link log
+```{r fitP_01-plot}
+#| echo: true
+#| code-fold: true
+
 fitP = glm(y~age*group, family=poisson(link="log"), data=d)
 effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age:group")
 effP$group = as.factor(effP$group)
@@ -234,13 +315,17 @@ ggplot(d,aes(x=age,y=y,shape=group,color=group))+
 ```
 
 
-# infatti
+## infatti
 type I error arriva da 0.05 a 50% sulle interazioni con la link function sbagliata
 show code (da fare)
 grafico
 
 # Conclusions
-conclusioni
+
+## 
+there are many link functions (and families of distributions)
+
+use the right one: otherwise it's very likely you end up finding something that is not there!
 
 # Materials & Contact
 
@@ -254,7 +339,7 @@ Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_
 
 # Supplementary materials 
 
-## wrong family doesnt create issues
+## wrong family doesnt imply issues
 if we put the wrong family, but the correct link `family=gaussian(link="log")` 
 still no interaction (as it should)
 
