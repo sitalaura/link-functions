@@ -2,6 +2,7 @@
 library(ggplot2)
 library(effects)
 library(glmmTMB)
+library(patchwork)
 
 set.seed(3)
 N = 250
