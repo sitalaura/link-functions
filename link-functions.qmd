@@ -64,31 +64,34 @@ include-in-header:
       </style>
 ---
 
-#
+# 
 
 ```{r source}
 #| echo: false
 #| include: false
 source("R/datasim.R")
 ```
+
 per chi vuole provare a simulare le cose in tempo reale
 
-qr code che manda a questo link 
-https://github.com/sitalaura/link-functions/tree/main/R
+qr code che manda a questo link https://github.com/sitalaura/link-functions/tree/main/R
 
-oppure scaricare il file a questo percorso `sitalaura.github.io/link-functions/R/datasim.R` 
+oppure scaricare il file a questo percorso `sitalaura.github.io/link-functions/R/datasim.R`
 
 # 1 Example
 
 ## Simulated dataset 1
+
 independent variable: age in years (`years`)
 
 dependent variable: (`variabile`)
 
 **aggiungi screenshot dataset**
 
-## Linear model 
+## Linear model
+
 using the classical linear predictor
+
 ```{r ex1fitL}
 #| echo: true
 #| eval: false
@@ -106,33 +109,36 @@ what we dont see it bc its a default parameter but its actually hidden in our co
 fitL_explicit = glm(y~age, family=gaussian(link="identity"), data=d)
 ```
 
-::: {.fragment}
+::: fragment
 the model uses family gaussian and the identity link function
 :::
 
-::: {.fragment}
+::: fragment
 **link function** in GLMs transforms (re-map) the linear predictor X
 
 to the appropriate range of the response variable Y
 :::
 
+## Identity link function
 
-## identity link 
 equal intervals on X correspond to equal intervals on Y
 
-PLOT DELLA RETTA su x ed y metti i nomi delle variabili dell'esempio 
+PLOT DELLA RETTA su x ed y metti i nomi delle variabili dell'esempio
 
-# 2 Example 
+# 2 Example
 
 ## Simulated dataset 2
+
 independent variable: age in years (`years`)
 
-dependent variable: mistakes in a reading task (`errors`) 
+dependent variable: mistakes in a reading task (`errors`)
 
 **aggiungi screenshot dataset**
 
-## Linear model 
+## Linear model
+
 using the classical linear predictor
+
 ```{r fitL}
 #| echo: true
 #| eval: false
@@ -140,6 +146,7 @@ fitL = glm(y~age, data=d)
 ```
 
 ## Linear model
+
 ```{r fitL-plot}
 #| echo: true
 #| code-fold: true
@@ -154,31 +161,38 @@ ggplot(d,aes(x=age,y=y))+
   scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
   ylab("Errors")+xlab("Age (years)")
 ```
-## wrong link (and wrong family)
 
-IN THE FIRST EXAMPLE an identity link was appropriate bc 
+## ❌  Wrong link function
 
-- x (`years`) spans from -inf to +inf
+IN THE FIRST EXAMPLE an identity link was appropriate bc
 
-- y (`boh`) spans from -inf to +inf
+-   x (`years`) spans from -inf to +inf
 
-::: {.fragment}
-here an identity link is NOT appropriate bc 
+-   y (`boh`) spans from -inf to +inf
 
-- x (`years`) spans from -inf to +inf
+::: fragment
+here an identity link is NOT appropriate bc
 
-- y (`errors`) spans from 0 to +inf
+-   x (`years`) spans from -inf to +inf
+
+-   y (`errors`) spans from 0 to +inf
 :::
 
-## link log
+::: notes
+family is also wrong but doesnt concern what we're talking about
+:::
+
+## ✅  Log link function
+
 equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
 
-PLOT DEL LOGARITMO (O QUELLO APPROPRIATO CON L'ESEMPIO) su x ed y metti i nomi delle variabili dell'esempio 
+PLOT DEL LOGARITMO (O QUELLO APPROPRIATO CON L'ESEMPIO) su x ed y metti i nomi delle variabili dell'esempio
 
-## Appropriate model
+## ✅  Appropriate model
+
 using the appropriate distribution `family=poisson`
 
-and **the appropriate link `link="log"`**
+and **the appropriate link**
 
 ```{r fitP}
 #| echo: true
@@ -186,7 +200,9 @@ and **the appropriate link `link="log"`**
 fitP = glm(y~age, family=poisson(link="log"), data=d)
 ```
 
-## Appropriate model
+in this case, `link="log"` makes sure that `y` spans from 0 and +inf
+
+## ✅  Appropriate model
 
 ```{r fitP-plot}
 #| echo: true
@@ -207,7 +223,7 @@ p1 <- ggplot(d,aes(x=age,y=y))+
 p1 
 ```
 
-## Appropriate model 
+## ✅  Appropriate model (blue one)
 
 ```{r fitP-plot2}
 #| echo: true
@@ -227,7 +243,6 @@ p1 | p2
 
 ```
 
-
 # 3 Adding an interaction
 
 ## Simulated dataset 2
@@ -236,17 +251,17 @@ independent variable: age in years (`years`)
 
 dependent variable: mistakes in a reading task (`errors`)
 
-::: {.fragment}
+::: fragment
 **adding a new main effect**
 
 groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
 :::
 
-## Interaction with link identity
-an interaction would emerge with a classical linear model (commenta l'output)
-il link è quello identico mettilo nel codice
+## ❌  Identity link function
 
-using the wrong link 
+an interaction would emerge with a classical linear model (commenta l'output) il link è quello identico mettilo nel codice
+
+using the wrong link
 
 ```{r fitL_01}
 #| echo: true
@@ -257,7 +272,7 @@ fitL_1 = glmmTMB(y ~ age * group + (1|id), data=d)
 anova(fitL_0, fitL_1)
 ```
 
-## Interaction with link identity
+## ❌  Identity link function
 
 ```{r fitL_01-plot}
 #| echo: true
@@ -304,7 +319,7 @@ ggplot(d, aes(x = age, y = y, shape = group, color = group)) +
 
 ```
 
-## Interaction with link log
+## ✅  Log link function
 
 no significant interaction using the correct link
 
@@ -317,7 +332,8 @@ fitP_1 = glmmTMB(y ~ age * group + (1|id), family=poisson(link="log"), data=d)
 anova(fitP_0, fitP_1)
 ```
 
-## Interaction with link log
+## ✅  Log link function
+
 ```{r fitP_01-plot}
 #| echo: true
 #| code-fold: true
@@ -336,20 +352,53 @@ ggplot(d,aes(x=age,y=y,shape=group,color=group))+
 
 ```
 
+## Huge false positive interactions rate
 
-## infatti
-type I error arriva da 0.05 a 50% sulle interazioni con la link function sbagliata
-show code (da fare)
-grafico
+::: columns
+::: column
+✅ correct `link="log"`
+
+→ false positive interactions are 3.5% (about ok)
+::: 
+
+::: column
+```{r}
+#| echo: TRUE
+
+```
+::: 
+
+::: 
+
+## Huge false positive interactions rate
+
+::: columns
+::: column
+❌ incorrect `link="identity"`
+
+→ false positive interactions are 76.9% (baaad!)
+::: 
+
+::: column
+```{r}
+#| echo: TRUE
+
+```
+::: 
+
+::: 
 
 # Conclusions
 
 ## 
+
 there are many link functions (and families of distributions)
 
 use the right one: otherwise it's very likely you end up finding something that is not there!
 
-# Materials & Contact
+We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction: so far, quite often
+
+## Materials & Contact
 
 All materials are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
 
@@ -357,20 +406,43 @@ Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_
 
 ![](images/logo.png){fig-align="center" width="2.4cm"}
 
-# Bibliography
+## Bibliography
 
-# Supplementary materials 
+<div style="margin-top:1cm;"></div>
+<p style="font-size:70%; text-align:left; line-height:1.2;">
+Domingue, B. W., Kanopka, K., Trejo, S., Rhemtulla, M., & Tucker-Drob, E. M. (2024). Ubiquitous bias and false discovery due to model misspecification in analysis of statistical interactions: The role of the outcome’s distribution and metric properties. *Psychological methods, 29*(6), 1164.
+</p>
+
+<div style="margin-top:1cm;"></div>
+<p style="font-size:70%; text-align:left; line-height:1.2;">
+Hardwicke, T. E., Thibault, R. T., Clarke, B., Moodie, N., Crüwell, S., Schiavone, S. R.,
+Handcock, S. A., Nghiem, K. A., Mody, F., Eerola, T., et al. (2024). Prevalence of
+transparent research practices in psychology: A cross-sectional study of empirical articles
+published in 2022. *Advances in Methods and Practices in Psychological Science, 7* (4),
+25152459241283477.
+</p>
+
+<div style="margin-top:1cm;"></div>
+<p style="font-size:70%; text-align:left; line-height:1.2;">
+Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong?. *Journal of Experimental Social Psychology, 79*, 328-348.
+</p>
+
+<div style="margin-top:1cm;"></div>
+<p style="font-size:70%; text-align:left; line-height:1.2;">
+Micceri, T. (1989). The unicorn, the normal curve, and other improbable creatures. *Psychological bulletin, 105*(1), 156.
+</p>
+
+# Supplementary materials
 
 ## wrong family doesnt imply issues
-if we put the wrong family, but the correct link `family=gaussian(link="log")` 
-still no interaction (as it should)
+
+if we put the wrong family, but the correct link `family=gaussian(link="log")` still no interaction (as it should)
 
 ```{r sup1a}
 #| echo: false
 #| eval: true
 b0 <- log(mean(d$y))
 ```
-
 
 ```{r sup1b}
 #| echo: true
@@ -383,4 +455,3 @@ fitL_log_1 <- glmmTMB(y ~ age * group + (1|id), family = gaussian(link="log"), d
 
 anova(fitL_log_0, fitL_log_1)
 ```
-
