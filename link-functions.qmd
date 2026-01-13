@@ -70,6 +70,8 @@ include-in-header:
 #| echo: false
 #| include: false
 source("R/datasim.R")
+ts <- 16
+tc <- "black"
 ```
 
 per chi vuole provare a simulare le cose in tempo reale
@@ -123,7 +125,59 @@ to the appropriate range of the response variable Y
 
 equal intervals on X correspond to equal intervals on Y
 
-PLOT DELLA RETTA su x ed y metti i nomi delle variabili dell'esempio
+su x ed y metti i nomi delle variabili dell'esempio
+
+```{r idlink}
+#| echo: false
+#| fig.align: "center" 
+
+df_line <- data.frame(
+  x = seq(-4.5, 4.5, length.out = 200)
+)
+df_line$y <- df_line$x
+
+
+x_vals <- -4:4
+y_vals <- -4:4
+
+ggplot(df_line, aes(x = x, y = y)) +
+  geom_hline(
+    yintercept = y_vals,
+    color = "grey60",
+    linewidth = 0.6
+  ) +
+  geom_vline(
+    xintercept = x_vals,
+    color = "red",
+    linetype = "dashed",
+    linewidth = 0.6
+  ) +
+  geom_line(
+    color = "blue",
+    linewidth = 2
+  ) +
+  scale_x_continuous(
+    limits = c(-4.5, 4.5),
+    breaks = x_vals
+  ) +
+  scale_y_continuous(
+    limits = c(-4.5, 4.5),
+    breaks = y_vals
+  ) +
+  
+  # Etichette
+  labs(
+    x = "Age (years)",
+    y = "vd (boh)"
+  ) +
+  theme_minimal(base_size = 18) +
+  theme(
+    plot.title = element_text(face = "bold", color = "steelblue", size = 26),
+    plot.subtitle = element_text(size = 18),
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14)
+  )
+```
 
 # 2 Example
 
@@ -162,18 +216,14 @@ ggplot(d,aes(x=age,y=y))+
   ylab("Errors")+xlab("Age (years)")
 ```
 
-## ❌  Wrong link function
+## ❌ Wrong link function
 
 IN THE FIRST EXAMPLE an identity link was appropriate bc
-
--   x (`years`) spans from -inf to +inf
 
 -   y (`boh`) spans from -inf to +inf
 
 ::: fragment
 here an identity link is NOT appropriate bc
-
--   x (`years`) spans from -inf to +inf
 
 -   y (`errors`) spans from 0 to +inf
 :::
@@ -182,13 +232,75 @@ here an identity link is NOT appropriate bc
 family is also wrong but doesnt concern what we're talking about
 :::
 
-## ✅  Log link function
+## ✅ Log link function
 
 equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
 
-PLOT DEL LOGARITMO (O QUELLO APPROPRIATO CON L'ESEMPIO) su x ed y metti i nomi delle variabili dell'esempio
+```{r loglink}
+#| echo: false
+#| warning: false
+#| fig.align: "center" 
 
-## ✅  Appropriate model
+df <- data.frame(
+  x = seq(-2.2, 1.6, length.out = 300)
+)
+df$y <- exp(df$x)
+
+x_vals <- seq(-1.5, 1.5, by = 0.5)
+y_vals <- exp(x_vals)
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_hline(
+    yintercept = y_vals,
+    color = "grey60",
+    linewidth = 0.6
+  ) +
+  geom_vline(
+    xintercept = x_vals,
+    color = "red",
+    linetype = "dashed",
+    linewidth = 0.6
+  ) +
+  geom_line(
+    color = "blue",
+    linewidth = 2
+  ) +
+  annotate(
+    "text",
+    x = -2.25,
+    y = y_vals,
+    label = paste("y =", round(y_vals, 2)),
+    hjust = 1,
+    size = 4
+  ) +
+  annotate(
+    "text",
+    x = x_vals,
+    y = -0.08,
+    label = paste("x =", x_vals),
+    vjust = 1,
+    size = 4
+  ) +
+  scale_x_continuous(
+    limits = c(-2.2, 1.6),
+    breaks = x_vals
+  ) +
+  scale_y_continuous(
+    limits = c(0, max(y_vals) + 0.8),
+    breaks = y_vals
+  ) +
+  labs(
+    x = "Age (years)",
+    y = "Reading mistakes (errors)"
+  ) +
+  theme_minimal(base_size = 18) +
+  theme(
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14)
+  )
+```
+
+## ✅ Appropriate model
 
 using the appropriate distribution `family=poisson`
 
@@ -202,7 +314,7 @@ fitP = glm(y~age, family=poisson(link="log"), data=d)
 
 in this case, `link="log"` makes sure that `y` spans from 0 and +inf
 
-## ✅  Appropriate model
+## ✅ Appropriate model
 
 ```{r fitP-plot}
 #| echo: true
@@ -223,7 +335,7 @@ p1 <- ggplot(d,aes(x=age,y=y))+
 p1 
 ```
 
-## ✅  Appropriate model (blue one)
+## ✅ Appropriate model (blue one)
 
 ```{r fitP-plot2}
 #| echo: true
@@ -257,7 +369,7 @@ dependent variable: mistakes in a reading task (`errors`)
 groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
 :::
 
-## ❌  Identity link function
+## ❌ Identity link function
 
 an interaction would emerge with a classical linear model (commenta l'output) il link è quello identico mettilo nel codice
 
@@ -267,19 +379,16 @@ using the wrong link
 #| echo: true
 #| include: true
 #| warning: true
-fitL_0 = glmmTMB(y ~ age + group + (1|id), data=d)
-fitL_1 = glmmTMB(y ~ age * group + (1|id), data=d)
-anova(fitL_0, fitL_1)
+fitL_0 = glm(y ~ age + group, data=d)
+fitL_1 = glm(y ~ age * group, data=d)
+anova(fitL_0, fitL_1, test = "Chisq")
 ```
 
-## ❌  Identity link function
+## ❌ Identity link function
 
 ```{r fitL_01-plot}
 #| echo: true
 #| code-fold: true
-
-ts <- 16
-tc <- "black"
 
 eff_obj <- allEffects(
   fitL_1,
@@ -319,7 +428,7 @@ ggplot(d, aes(x = age, y = y, shape = group, color = group)) +
 
 ```
 
-## ✅  Log link function
+## ✅ Log link function
 
 no significant interaction using the correct link
 
@@ -327,12 +436,12 @@ no significant interaction using the correct link
 #| echo: true
 #| include: true
 #| warning: false
-fitP_0 = glmmTMB(y ~ age + group + (1|id), family=poisson(link="log"), data=d)
-fitP_1 = glmmTMB(y ~ age * group + (1|id), family=poisson(link="log"), data=d)
+fitP_0 = glm(y ~ age + group, family=poisson(link="log"), data=d)
+fitP_1 = glm(y ~ age * group, family=poisson(link="log"), data=d)
 anova(fitP_0, fitP_1)
 ```
 
-## ✅  Log link function
+## ✅ Log link function
 
 ```{r fitP_01-plot}
 #| echo: true
@@ -352,41 +461,55 @@ ggplot(d,aes(x=age,y=y,shape=group,color=group))+
 
 ```
 
-## Huge false positive interactions rate
+## False positive interactions rate
 
-::: columns
+::::: columns
 ::: column
 ✅ correct `link="log"`
 
-→ false positive interactions are 3.5% (about ok)
-::: 
+→ false positive 
+
+interactions are 3.5% 
+
+(about ok)
+:::
 
 ::: column
-```{r}
-#| echo: TRUE
-
+```{r loglink-error}
+#| echo: false
+ggplot(data.frame(p = pvals_log), aes(x = p)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = 0.05, linetype = "dashed") +
+  labs(
+    x = "p-value (interazione age:group)",
+    y = "conteggio",
+  )
 ```
-::: 
+:::
+:::::
 
-::: 
+## False positive interactions rate
 
-## Huge false positive interactions rate
-
-::: columns
+::::: columns
 ::: column
 ❌ incorrect `link="identity"`
 
 → false positive interactions are 76.9% (baaad!)
-::: 
+:::
 
 ::: column
-```{r}
-#| echo: TRUE
+```{r idlink-error}
+#| echo: false
 
+ggplot(data.frame(p = pvals_id), aes(x = p)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = 0.05, linetype = "dashed") +
+  labs(
+    x = "p-value (interazione age*group)",
+    y = "conteggio")
 ```
-::: 
-
-::: 
+:::
+:::::
 
 # Conclusions
 
@@ -408,33 +531,29 @@ Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_
 
 ## Bibliography
 
-<div style="margin-top:1cm;"></div>
 <p style="font-size:70%; text-align:left; line-height:1.2;">
 Domingue, B. W., Kanopka, K., Trejo, S., Rhemtulla, M., & Tucker-Drob, E. M. (2024). Ubiquitous bias and false discovery due to model misspecification in analysis of statistical interactions: The role of the outcome’s distribution and metric properties. *Psychological methods, 29*(6), 1164.
 </p>
 
-<div style="margin-top:1cm;"></div>
 <p style="font-size:70%; text-align:left; line-height:1.2;">
-Hardwicke, T. E., Thibault, R. T., Clarke, B., Moodie, N., Crüwell, S., Schiavone, S. R.,
-Handcock, S. A., Nghiem, K. A., Mody, F., Eerola, T., et al. (2024). Prevalence of
-transparent research practices in psychology: A cross-sectional study of empirical articles
-published in 2022. *Advances in Methods and Practices in Psychological Science, 7* (4),
-25152459241283477.
+Hardwicke, T. E., Thibault, R. T., Clarke, B., Moodie, N., Crüwell, S., Schiavone, S. R., Handcock, S. A., Nghiem, K. A., Mody, F., Eerola, T., et al. (2024). Prevalence of transparent research practices in psychology: A cross-sectional study of empirical articles published in 2022. *Advances in Methods and Practices in Psychological Science, 7* (4), 25152459241283477.
 </p>
 
-<div style="margin-top:1cm;"></div>
 <p style="font-size:70%; text-align:left; line-height:1.2;">
 Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong?. *Journal of Experimental Social Psychology, 79*, 328-348.
 </p>
 
-<div style="margin-top:1cm;"></div>
 <p style="font-size:70%; text-align:left; line-height:1.2;">
 Micceri, T. (1989). The unicorn, the normal curve, and other improbable creatures. *Psychological bulletin, 105*(1), 156.
 </p>
 
+## Thank you
+
+Special thanks to
+
 # Supplementary materials
 
-## wrong family doesnt imply issues
+## wrong family doesnt imply interaction issues
 
 if we put the wrong family, but the correct link `family=gaussian(link="log")` still no interaction (as it should)
 
@@ -442,6 +561,7 @@ if we put the wrong family, but the correct link `family=gaussian(link="log")` s
 #| echo: false
 #| eval: true
 b0 <- log(mean(d$y))
+d$group <- as.factor(d$group)
 ```
 
 ```{r sup1b}
@@ -449,9 +569,9 @@ b0 <- log(mean(d$y))
 #| include: true
 #| warning: false
 
-fitL_log_0 <- glmmTMB(y ~ age + group + (1|id), family = gaussian(link="log"), data=d, start=list(beta=c(b0, 0, 0)))
+fitL_log_0 <- glm(y ~ age + group, family = gaussian(link = "log"), data = d, start = c(b0, 0, 0))
 
-fitL_log_1 <- glmmTMB(y ~ age * group + (1|id), family = gaussian(link="log"), data=d, start=list(beta=c(b0, 0, 0, 0)))
+fitL_log_1 <- glm(y ~ age * group, family = gaussian(link = "log"), data = d, start = c(b0, 0, 0, 0))
 
-anova(fitL_log_0, fitL_log_1)
+anova(fitL_log_0, fitL_log_1, test = "Chisq")
 ```
