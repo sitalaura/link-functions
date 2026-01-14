@@ -121,6 +121,384 @@ the model uses family gaussian and the identity link function
 to the appropriate range of the response variable Y
 :::
 
+
+# 2 Example
+
+## Simulated dataset 2
+
+independent variable: age in years (`years`)
+
+dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
+
+**aggiungi screenshot dataset**
+
+## Linear model
+
+using the classical linear predictor
+
+```{r fitL}
+#| echo: true
+#| eval: false
+fitL = glm(accuracy~age, data=d)
+```
+
+## Linear model
+
+```{r fitL-plot}
+#| echo: true
+#| code-fold: true
+
+fitL <- glm(accuracy ~ age, data = d)
+
+effL <- data.frame(
+  allEffects(
+    fitL,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age"]]
+)
+
+ggplot(d, aes(x = age, y = accuracy)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_point(size = 4, alpha = .5, color = "darkblue") +
+  geom_ribbon(
+    data = effL,
+    aes(x = age, ymin = lower, ymax = upper),
+    alpha = .3, fill = "darkred", color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effL,
+    aes(x = age, y = fit),
+    size = 2, color = "darkred",
+    inherit.aes = FALSE
+  ) +
+  theme(text = element_text(size = ts, color = "black")) +
+  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
+  scale_y_continuous(breaks = seq(0, 1, .1)) +
+  ylab("accuracy") + xlab("Age (years)")
+
+```
+
+::: fragment
+questo modello ci aiuta a predire i dati?
+:::
+
+## Linear model
+
+no perché a 11 anni i bambini hanno accuratezza del 110%
+
+GRAFICO
+
+::: fragment
+effettivamente succede a 11 anni: posterior model predicion 
+
+GRAFICO A DESTRA DELL'ALTRO 
+:::
+
+## ❌ Inappropriate model
+
+IN THE FIRST EXAMPLE an identity link was appropriate bc
+
+-   y (`boh`) spans from -inf to +inf
+
+::: fragment
+here an identity link is NOT appropriate bc
+
+-   y (`accuracy`) spans from 0 to 1
+:::
+
+::: notes
+al pubblico: dobbiamo quindi cambiare modello, perché quello lineare non aiuta a predire nuovi dati CIOE non tiene conto dei bound dei data (0 e 1)
+domanda: quindi, che modello facciamo? 
+risposta: regressione logistica
+:::
+
+
+## ✅ Better model
+
+```{r fitLogit}
+#| echo: true
+#| warning: false
+
+fitLogit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
+```
+
+in this case, `link="logit"` makes sure that `y` spans from 0 and 1
+
+## ✅ Better model
+
+```{r fitLogit-plot}
+#| echo: true
+#| code-fold: true
+#| warning: false
+
+effLogit <- data.frame(
+  allEffects(
+    fitLogit,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age"]]
+)
+
+p1 <- ggplot(d, aes(x = age, y = accuracy)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_point(size = 4, alpha = .5, color = "darkblue") +
+  geom_ribbon(
+    data = effLogit,
+    aes(x = age, ymin = lower, ymax = upper),
+    alpha = .25, fill = "blue", color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effLogit,
+    aes(x = age, y = fit),
+    linewidth = 2, color = "blue",
+    inherit.aes = FALSE
+  ) +
+  theme(text = element_text(size = ts, color = "black")) +
+  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
+  scale_y_continuous(breaks = seq(0, 1, .1)) +
+  labs(y = "accuracy", x = "Age (years)")
+
+p1
+
+
+```
+
+## ✅ Appropriate model (blue one)
+
+```{r fitP-plot2}
+#| echo: true
+#| code-fold: true
+
+p2 <- ggplot(d, aes(x = age, y = accuracy)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_point(size = 4, alpha = .5, color = "darkblue") +
+  geom_ribbon(
+    data = effLogit,
+    aes(x = age, ymin = lower, ymax = upper),
+    alpha = .25, fill = "blue", color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effLogit,
+    aes(x = age, y = fit),
+    linewidth = 2, color = "blue",
+    inherit.aes = FALSE
+  ) +
+  geom_ribbon(
+    data = effL,
+    aes(x = age, ymin = lower, ymax = upper),
+    alpha = .3, fill = "darkred", color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effL,
+    aes(x = age, y = fit),
+    size = 2, color = "darkred",
+    inherit.aes = FALSE
+  ) +
+  theme(text = element_text(size = ts, color = "black")) +
+  scale_x_continuous(
+    breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, 1, .1)
+  ) +
+  labs(y = "accuracy", x = "Age (years)")
+
+p1 | p2
+
+```
+
+::: notes
+vediamo graficamente che il modello predice bene i dati nuovi
+ci permette di predire nuovi outcome compresi tra 0 e 1
+:::
+
+# 3 Studying interactions
+
+## Simulated dataset 2
+
+independent variable: age in years (`years`)
+
+dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
+
+::: fragment
+**adding a new main effect**
+
+groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
+:::
+
+## Identity link function
+
+using an linear model `family=gaussian(link="identity")` a positive interaction emerges
+
+```{r fitLint}
+#| echo: true
+#| include: true
+#| warning: true
+fitLint = glm(accuracy ~ age*group, data=d)
+summary(fitLint)
+```
+
+## Identity link function
+
+```{r fitLint-plot}
+#| echo: true
+#| warning: false
+#| code-fold: true
+
+d$group <- as.factor(d$group)
+
+eff_obj <- allEffects(
+  fitLint,
+  xlevels = list(age = seq(min(d$age), max(d$age), .05))
+)[["age:group"]]
+
+effL <- as.data.frame(eff_obj)
+
+if (!("fit" %in% names(effL))) {
+  pred_col <- intersect(c("fit", "response", "fitted", "yhat"), names(effL))
+  if (length(pred_col) == 0) stop("Nessuna colonna di predizione trovata in effL.")
+  effL$fit <- effL[[pred_col[1]]]
+}
+
+ggplot(d, aes(x = age, y = accuracy, shape = group, color = group)) +
+  geom_point(size = 4, alpha = .6) +
+  geom_ribbon(
+    data = effL,
+    aes(x = age, ymin = lower, ymax = upper, fill = group, group = group),
+    alpha = .3,
+    color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effL,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = c("darkorange3", "darkgreen")) +
+  scale_fill_manual(values = c("darkorange3", "darkgreen")) +
+  theme(text = element_text(size = ts, color = tc)) +
+  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
+  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(0, 1)) +
+  labs(y = "Accuracy", x = "Age (years)")
+
+
+```
+
+## Logit link function
+
+using an linear model `family=binomial(link="logit")` a negative interaction emerges
+
+```{r fitLogitint}
+#| echo: true
+#| include: true
+#| warning: false
+
+fitLogitint = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"),
+          weights= rep(k, nrow(d)))
+summary(fitLogitint)
+```
+
+## Logit link function
+
+```{r fitLogitint-plot}
+#| echo: true
+#| code-fold: true
+#| eval: false
+
+fitLogitint <- glm(
+  accuracy ~ age * group,
+  data = d,
+  family = binomial(link = "logit"),
+  weights = rep(k, nrow(d))
+)
+
+effP <- data.frame(
+  allEffects(
+    fitLogitint,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
+
+effP$group <- as.factor(effP$group)
+
+ggplot(d, aes(x = age, y = accuracy, shape = group, color = group)) +
+  geom_point(size = 4, alpha = .6) +
+  geom_ribbon(
+    data = effP,
+    aes(x = age, ymin = lower, ymax = upper, group = group, fill = group),
+    alpha = .3, color = NA,
+    inherit.aes = FALSE
+  ) +
+  geom_line(
+    data = effP,
+    aes(x = age, y = fit, group = group, linetype = group, color = group),
+    linewidth = 2,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = c("darkorange2", "darkgreen")) +
+  scale_fill_manual(values = c("darkorange2", "darkgreen")) +
+  theme(text = element_text(size = ts, color = "black")) +
+  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
+  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(0, 1)) +
+  ylab("accuracy") + xlab("Age (years)")
+
+```
+
+::: notes
+domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulato? o nessuno dei due?
+riformula la domanda: in termini dell'esempio tipo all'aumentare dell'età,... 
+e perché?
+:::
+
+## cosa ho effettivamente simulato
+
+```{r datasim}
+#| echo: true
+#| include: true
+#| code-folder: true
+
+#codice della simulazione 
+```
+
+non ho simulato un'interazione, quindi ENTRAMBI i modelli trovano un'interazione che non c'è.
+
+::: notes
+sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica?
+risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0%
+pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. 
+il link in questione si chiama e ve lo mostro nel modello
+:::
+
+## il vero modello in grado di fittare i dati: link="mafc.probit"
+
+let's try out the multiple alternative forced choice (50% - bc of the true/false) probit link
+
+```{r fitMint1}
+#| echo: true
+#| eval: false
+fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+
+```
+
+## il vero modello in grado di fittare i dati: link="mafc.probit"
+
+using an linear model `family=binomial(link="mafc.probit")` no interaction emerges !!!! as it should be
+
+```{r fitMint2}
+#| echo: true
+#| warning: true
+
+fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+
+summary(fitM)
+```
+
+# 4 Why interactions
+
 ## Identity link function
 
 equal intervals on X correspond to equal intervals on Y
@@ -167,8 +545,8 @@ ggplot(df_line, aes(x = x, y = y)) +
   
   # Etichette
   labs(
-    x = "Age (years)",
-    y = "vd (boh)"
+    x = "Linear component of the model",
+    y = "Dependent variable"
   ) +
   theme_minimal(base_size = 18) +
   theme(
@@ -178,59 +556,6 @@ ggplot(df_line, aes(x = x, y = y)) +
     axis.text = element_text(size = 14)
   )
 ```
-
-# 2 Example
-
-## Simulated dataset 2
-
-independent variable: age in years (`years`)
-
-dependent variable: mistakes in a reading task (`errors`)
-
-**aggiungi screenshot dataset**
-
-## Linear model
-
-using the classical linear predictor
-
-```{r fitL}
-#| echo: true
-#| eval: false
-fitL = glm(y~age, data=d)
-```
-
-## Linear model
-
-```{r fitL-plot}
-#| echo: true
-#| code-fold: true
-fitL = glm(y~age, data=d)
-effL = data.frame(allEffects(fitL,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
-ggplot(d,aes(x=age,y=y))+
-  coord_cartesian(ylim=c(-0.4,max(y))) +
-  geom_point(size=4,alpha=.5,color="darkblue")+
-  geom_line(data=effL,aes(y=fit),size=2,color="darkred")+
-  geom_ribbon(data=effL,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="darkred")+
-  theme(text=element_text(size=ts,color="black"))+
-  scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
-  ylab("Errors")+xlab("Age (years)")
-```
-
-## ❌ Wrong link function
-
-IN THE FIRST EXAMPLE an identity link was appropriate bc
-
--   y (`boh`) spans from -inf to +inf
-
-::: fragment
-here an identity link is NOT appropriate bc
-
--   y (`errors`) spans from 0 to +inf
-:::
-
-::: notes
-family is also wrong but doesnt concern what we're talking about
-:::
 
 ## ✅ Log link function
 
@@ -290,8 +615,8 @@ ggplot(df, aes(x = x, y = y)) +
     breaks = y_vals
   ) +
   labs(
-    x = "Age (years)",
-    y = "Reading mistakes (errors)"
+    x = "Linear component of the model",
+    y = "Dependent variable (ie error rate)"
   ) +
   theme_minimal(base_size = 18) +
   theme(
@@ -300,224 +625,20 @@ ggplot(df, aes(x = x, y = y)) +
   )
 ```
 
-## ✅ Appropriate model
-
-using the appropriate distribution `family=poisson`
-
-and **the appropriate link**
-
-```{r fitP}
-#| echo: true
-#| eval: false
-fitP = glm(y~age, family=poisson(link="log"), data=d)
-```
-
-in this case, `link="log"` makes sure that `y` spans from 0 and +inf
-
-## ✅ Appropriate model
-
-```{r fitP-plot}
-#| echo: true
-#| code-fold: true
-
-fitP = glm(y~age, family=poisson(link="log"), data=d)
-
-effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age")
-p1 <- ggplot(d,aes(x=age,y=y))+
-  coord_cartesian(ylim=c(-0.4,max(y))) +
-  geom_point(size=4,alpha=.5,color="darkblue")+
-  geom_line(data=effP,aes(y=fit),size=2,color="blue")+
-  geom_ribbon(data=effP,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="blue")+
-  theme(text=element_text(size=ts,color="black"))+
-  scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
-  ylab("Errors")+xlab("Age (years)")
-
-p1 
-```
-
-## ✅ Appropriate model (blue one)
-
-```{r fitP-plot2}
-#| echo: true
-#| code-fold: true
-p2 <- ggplot(d,aes(x=age,y=y))+
-  coord_cartesian(ylim=c(-0.4,max(y))) +
-  geom_point(size=4,alpha=.5,color="darkblue")+
-  geom_line(data=effP,aes(y=fit),size=2,color="blue")+
-  geom_ribbon(data=effP,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="blue")+
-  geom_line(data=effL,aes(y=fit),size=2,color="darkred")+
-  geom_ribbon(data=effL,aes(y=fit,ymin=lower,ymax=upper),alpha=.3,fill="darkred")+
-  theme(text=element_text(size=ts,color="black"))+
-  scale_y_continuous(breaks=seq(0,20,2))+scale_x_continuous(breaks=seq(0,20,.5))+
-  ylab("Errors")+xlab("Age (years)")
-
-p1 | p2
-
-```
-
-# 3 Adding an interaction
-
-## Simulated dataset 2
-
-independent variable: age in years (`years`)
-
-dependent variable: mistakes in a reading task (`errors`)
-
-::: fragment
-**adding a new main effect**
-
-groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
-:::
-
-## ❌ Identity link function
-
-an interaction would emerge with a classical linear model (commenta l'output) il link è quello identico mettilo nel codice
-
-using the wrong link
-
-```{r fitL_01}
-#| echo: true
-#| include: true
-#| warning: true
-fitL_0 = glm(y ~ age + group, data=d)
-fitL_1 = glm(y ~ age * group, data=d)
-anova(fitL_0, fitL_1, test = "Chisq")
-```
-
-## ❌ Identity link function
-
-```{r fitL_01-plot}
-#| echo: true
-#| code-fold: true
-
-eff_obj <- allEffects(
-  fitL_1,
-  xlevels = list(age = seq(min(d$age), max(d$age), .05))
-)[["age:group"]]
-
-effL <- as.data.frame(eff_obj)
-
-# garantisci colonna fit
-if (!("fit" %in% names(effL))) {
-  pred_col <- intersect(c("fit", "response", "fitted", "yhat"), names(effL))
-  if (length(pred_col) == 0)
-    stop("Nessuna colonna di predizione trovata in effL.")
-  effL$fit <- effL[[pred_col[1]]]
-}
-
-ggplot(d, aes(x = age, y = y, shape = group, color = group)) +
-  geom_point(size = 4, alpha = .6) +
-  geom_ribbon(
-    data = effL,
-    aes(x = age, ymin = lower, ymax = upper, fill = group, group = group),
-    alpha = .3,
-    color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effL,
-    aes(x = age, y = fit, color = group, group = group),
-    linewidth = 2,
-    inherit.aes = FALSE
-  ) +
-  scale_color_manual(values = c("darkorange3", "darkgreen")) +
-  scale_fill_manual(values = c("darkorange3", "darkgreen")) +
-  theme(text = element_text(size = ts, color = tc)) +
-  scale_x_continuous(breaks = seq(6, 10, .5)) +
-  labs(y = "Errors", x = "Age (years)")
-
-```
-
-## ✅ Log link function
-
-no significant interaction using the correct link
-
-```{r fitP_01}
-#| echo: true
-#| include: true
-#| warning: false
-fitP_0 = glm(y ~ age + group, family=poisson(link="log"), data=d)
-fitP_1 = glm(y ~ age * group, family=poisson(link="log"), data=d)
-anova(fitP_0, fitP_1)
-```
-
-## ✅ Log link function
-
-```{r fitP_01-plot}
-#| echo: true
-#| code-fold: true
-
-fitP = glm(y~age*group, family=poisson(link="log"), data=d)
-effP = data.frame(allEffects(fitP,xlevels=list(age=seq(min(age),max(age),.05)))$"age:group")
-effP$group = as.factor(effP$group)
-ggplot(d,aes(x=age,y=y,shape=group,color=group))+
-  geom_point(size=4,alpha=.6)+
-  scale_color_manual(values=c("darkorange2","darkgreen"))+
-  scale_fill_manual(values=c("darkorange1","darkgreen"))+
-  geom_line(data=effP,aes(x=age,y=fit,group=group,linetype=group),size=2)+
-  geom_ribbon(data=effP,aes(x=age,y=fit,ymin=lower,ymax=upper,group=group,fill=group),alpha=.3,color=NA)+
-  theme(text=element_text(size=ts,color="black"))+scale_x_continuous(breaks=seq(0,20,.5))+
-  ylab("Errors")+xlab("Age (years)")
-
-```
-
-## False positive interactions rate
-
-::::: columns
-::: column
-✅ correct `link="log"`
-
-→ false positive 
-
-interactions are 3.5% 
-
-(about ok)
-:::
-
-::: column
-```{r loglink-error}
-#| echo: false
-ggplot(data.frame(p = pvals_log), aes(x = p)) +
-  geom_histogram(bins = 30) +
-  geom_vline(xintercept = 0.05, linetype = "dashed") +
-  labs(
-    x = "p-value (interazione age:group)",
-    y = "conteggio",
-  )
-```
-:::
-:::::
-
-## False positive interactions rate
-
-::::: columns
-::: column
-❌ incorrect `link="identity"`
-
-→ false positive interactions are 76.9% (baaad!)
-:::
-
-::: column
-```{r idlink-error}
-#| echo: false
-
-ggplot(data.frame(p = pvals_id), aes(x = p)) +
-  geom_histogram(bins = 30) +
-  geom_vline(xintercept = 0.05, linetype = "dashed") +
-  labs(
-    x = "p-value (interazione age*group)",
-    y = "conteggio")
-```
-:::
-:::::
 
 # Conclusions
 
 ## 
 
-there are many link functions (and families of distributions)
+Building a model means that we want to find the processo generativo dei dati which, diversamente dal mondo delle simulazioni, we could never know for sure
 
-use the right one: otherwise it's very likely you end up finding something that is not there!
+to do that we must make important decisions
+
+choosing the more appropriate **family of distributions** to make sure that the new values of the vd im predicting lie within the bounds
+
+choosing the more appropriate **link function**: otherwise it's very likely you end up finding non linear effects (ie interactions) that are not there!
+
+##
 
 We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction: so far, quite often
 
@@ -553,25 +674,12 @@ Special thanks to
 
 # Supplementary materials
 
-## wrong family doesnt imply interaction issues
+## Probit link function 
 
-if we put the wrong family, but the correct link `family=gaussian(link="log")` still no interaction (as it should)
-
-```{r sup1a}
-#| echo: false
-#| eval: true
-b0 <- log(mean(d$y))
-d$group <- as.factor(d$group)
-```
-
-```{r sup1b}
+```{r fitPint}
 #| echo: true
-#| include: true
-#| warning: false
 
-fitL_log_0 <- glm(y ~ age + group, family = gaussian(link = "log"), data = d, start = c(b0, 0, 0))
-
-fitL_log_1 <- glm(y ~ age * group, family = gaussian(link = "log"), data = d, start = c(b0, 0, 0, 0))
-
-anova(fitL_log_0, fitL_log_1, test = "Chisq")
+fitPint = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
+          weights= rep(k, nrow(d)))
+summary(fitPint)
 ```

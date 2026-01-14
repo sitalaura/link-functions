@@ -3,71 +3,61 @@ library(ggplot2)
 library(effects)
 library(glmmTMB)
 library(patchwork)
+library(psyphy)
 
-set.seed(3)
-N = 250
-age = round(runif(N,6,10),1)
+set.seed(2)
+
+k = 50
+N = 200
+age = runif(N,6,10)
+accuracy = rbinom(n=N, size=k, prob=plogis(-4.5+age*0.9))/k
+plot(age,accuracy)
+
+###################################
+
+set.seed(0)
+
+# un solo gruppo
+k = 60
+N = 400
+age = runif(N,6,10)
+eta = -5.5+age*0.9
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age,accuracy)
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point()
+
+# aggiungiamo secondo gruppo
+k = 50
+N = 1000
 group = rbinom(N,1,.5)
-y = rpois(N, exp(5.5 - age*.5 + group*.8))
-
-d = data.frame(id=1:length(y), y, age, group=as.factor(group))
-fitL_1 = glm(y ~ age * group + (1|id), data=d)
-fitP = glm(y ~ age*group, family=poisson(link="log"), data=d)
-
-# per vedere i falsi positivi
-niter <- 1000
-N <- 250
-
-pvals_log <- rep(NA, niter)
-
-for(i in 1:niter){
-  
-  age   <- round(runif(N, 6, 10), 1)
-  group <- rbinom(N, 1, .5)
-  
-  # DGP SENZA interazione: solo effetti principali su scala log
-  mu <- exp(5.5 - 0.5*age + 0.8*group)
-  y  <- rpois(N, lambda = mu)
-  
-  d <- data.frame(y = y, age = age, group = factor(group))
-  
-  # Modello "corretto": Poisson con link log, ma includo comunque l'interazione
-  fitP <- glm(y ~ age * group, family = poisson(link = "log"), data = d)
-  
-  # p-value del termine di interazione
-  pvals_log[i] <- summary(fitP)$coefficients["age:group1", "Pr(>|z|)"]
-}
-
-# Percentuale di falsi positivi (attesa ~5% se tutto è calibrato)
-mean(pvals_log < 0.05)
+age = runif(N,6,10)
+eta = -6+1*age-1*group
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age=age-mean(age),accuracy,group=as.factor(group))
+ggplot(d,aes(x=age,y=accuracy,color=group))+
+  geom_point()+
+  xlab("Age-centered")
 
 
-# ---- identity link (modello sbagliato) ----
+# identity
+fit = glm(accuracy ~ age*group, data=d)
+summary(fit)
 
-set.seed(3)
+# logit
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"),
+          weights= rep(k, nrow(d)))
+summary(fit)
 
-niter <- 1000
-N <- 250
+# probit
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
+          weights= rep(k, nrow(d)))
+summary(fit)
 
-pvals_id <- rep(NA, niter)
+# multiple alternative forced choice (50%) probit
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)),
+          weights= rep(k, nrow(d)))
+summary(fit)
 
-for(i in 1:niter){
-  
-  age   <- round(runif(N, 6, 10), 1)
-  group <- rbinom(N, 1, .5)
-  
-  # DGP SENZA interazione: solo effetti principali su scala log (Poisson)
-  mu <- exp(5.5 - 0.5*age + 0.8*group)
-  y  <- rpois(N, lambda = mu)
-  
-  d <- data.frame(y = y, age = age, group = factor(group))
-  
-  # Modello "sbagliato": Gaussian con link identity (equivale a lm)
-  fitL <- glm(y ~ age * group, family = gaussian(link = "identity"), data = d)
-  
-  # p-value dell'interazione (test t)
-  pvals_id[i] <- summary(fitL)$coefficients["age:group1", "Pr(>|t|)"]
-}
-
-# Percentuale di falsi positivi (qui tipicamente >> 0.05)
-mean(pvals_id < 0.05)
