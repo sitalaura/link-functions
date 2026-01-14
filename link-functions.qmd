@@ -214,7 +214,7 @@ risposta: regressione logistica
 :::
 
 
-## ✅ Better model
+## ✅ More appropriate model 
 
 ```{r fitLogit}
 #| echo: true
@@ -225,7 +225,7 @@ fitLogit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= r
 
 in this case, `link="logit"` makes sure that `y` spans from 0 and 1
 
-## ✅ Better model
+## ✅ More appropriate model 
 
 ```{r fitLogit-plot}
 #| echo: true
@@ -264,7 +264,7 @@ p1
 
 ```
 
-## ✅ Appropriate model (blue one)
+## ✅ More appropriate model (blue one)
 
 ```{r fitP-plot2}
 #| echo: true
