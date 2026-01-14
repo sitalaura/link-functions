@@ -4,6 +4,7 @@ library(effects)
 library(glmmTMB)
 library(patchwork)
 library(psyphy)
+library(DHARMa)
 
 set.seed(2)
 
@@ -25,8 +26,66 @@ eta = -5.5+age*0.9
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
+
+# modello sbagliato
+
+fit = lm(accuracy ~ age, data=d)
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
 ggplot(d,aes(x=age,y=accuracy))+
-  geom_point()
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
+
+d$pp_sim = simulate(fit)$sim_1
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
+
+ggplot(d,aes(x=accuracy))+
+  geom_histogram(aes(y=after_stat(density)),color=NA,fill="black",alpha=.4)+
+  geom_histogram(aes(x=pp_sim,y=after_stat(density)),color=NA,fill="purple",alpha=.4)
+
+# diagnostica dharma
+res = simulateResiduals(fittedModel = fit, n = 1000)
+testUniformity(res)
+testDispersion(res)
+testOutliers(res)
+testZeroInflation(res)
+plot(res)
+
+
+# modello adeguato
+
+fit = glm(accuracy ~ age, data=d, family=binomial(link="probit"),
+          weights= rep(k, nrow(d)))
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
+
+d$pp_sim = simulate(fit)$sim_1
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
+
+ggplot(d,aes(x=accuracy))+
+  geom_histogram(aes(y=after_stat(density)),color=NA,fill="black",alpha=.4)+
+  geom_histogram(aes(x=pp_sim,y=after_stat(density)),color=NA,fill="purple",alpha=.4)
+
+# diagnostica dharma
+res = simulateResiduals(fittedModel = fit, n = 1000)
+testUniformity(res)
+testDispersion(res)
+testOutliers(res)
+testZeroInflation(res)
+plot(res)
+
+
+
+###################################
 
 # aggiungiamo secondo gruppo
 k = 50

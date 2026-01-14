@@ -185,15 +185,14 @@ questo modello ci aiuta a predire i dati?
 
 ## Linear model
 
-no perché a 11 anni i bambini hanno accuratezza del 110%
+no perché a 11 anni i bambini hanno accuratezza sminchiata
 
-GRAFICO
+```{r fitP-plot2}
+#| echo: false
 
-::: fragment
-effettivamente succede a 11 anni: posterior model predicion 
+# GRAFICO POSTERIOR PREDICTIVE CHECK 
 
-GRAFICO A DESTRA DELL'ALTRO 
-:::
+```
 
 ## ❌ Inappropriate model
 
@@ -261,52 +260,6 @@ p1 <- ggplot(d, aes(x = age, y = accuracy)) +
 
 p1
 
-
-```
-
-## ✅ More appropriate model (blue one)
-
-```{r fitP-plot2}
-#| echo: true
-#| code-fold: true
-
-p2 <- ggplot(d, aes(x = age, y = accuracy)) +
-  coord_cartesian(ylim = c(0, 1)) +
-  geom_point(size = 4, alpha = .5, color = "darkblue") +
-  geom_ribbon(
-    data = effLogit,
-    aes(x = age, ymin = lower, ymax = upper),
-    alpha = .25, fill = "blue", color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effLogit,
-    aes(x = age, y = fit),
-    linewidth = 2, color = "blue",
-    inherit.aes = FALSE
-  ) +
-  geom_ribbon(
-    data = effL,
-    aes(x = age, ymin = lower, ymax = upper),
-    alpha = .3, fill = "darkred", color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effL,
-    aes(x = age, y = fit),
-    size = 2, color = "darkred",
-    inherit.aes = FALSE
-  ) +
-  theme(text = element_text(size = ts, color = "black")) +
-  scale_x_continuous(
-    breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)
-  ) +
-  scale_y_continuous(
-    breaks = seq(0, 1, .1)
-  ) +
-  labs(y = "accuracy", x = "Age (years)")
-
-p1 | p2
 
 ```
 
@@ -674,9 +627,18 @@ Special thanks to
 
 # Supplementary materials
 
+## POSTERIOR PREDICTIVE CHECK LOGITI
+
+```{r sup1}
+#| echo: false
+
+# GRAFICO POSTERIOR PREDICTIVE CHECK LOGIT
+
+```
+
 ## Probit link function 
 
-```{r fitPint}
+```{r sup2}
 #| echo: true
 
 fitPint = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
