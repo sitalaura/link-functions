@@ -4,7 +4,6 @@ library(effects)
 library(glmmTMB)
 library(patchwork)
 library(psyphy)
-library(DHARMa)
 
 set.seed(2)
 
@@ -46,18 +45,10 @@ ggplot(d,aes(x=accuracy))+
   geom_histogram(aes(y=after_stat(density)),color=NA,fill="black",alpha=.4)+
   geom_histogram(aes(x=pp_sim,y=after_stat(density)),color=NA,fill="purple",alpha=.4)
 
-# diagnostica dharma
-res = simulateResiduals(fittedModel = fit, n = 1000)
-testUniformity(res)
-testDispersion(res)
-testOutliers(res)
-testZeroInflation(res)
-plot(res)
-
 
 # modello adeguato
 
-fit = glm(accuracy ~ age, data=d, family=binomial(link="probit"),
+fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"),
           weights= rep(k, nrow(d)))
 eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
 eff$accuracy = eff$fit
@@ -74,15 +65,6 @@ ggplot(d,aes(x=age,y=accuracy))+
 ggplot(d,aes(x=accuracy))+
   geom_histogram(aes(y=after_stat(density)),color=NA,fill="black",alpha=.4)+
   geom_histogram(aes(x=pp_sim,y=after_stat(density)),color=NA,fill="purple",alpha=.4)
-
-# diagnostica dharma
-res = simulateResiduals(fittedModel = fit, n = 1000)
-testUniformity(res)
-testDispersion(res)
-testOutliers(res)
-testZeroInflation(res)
-plot(res)
-
 
 
 ###################################

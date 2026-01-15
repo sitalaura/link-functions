@@ -69,7 +69,13 @@ include-in-header:
 ```{r source}
 #| echo: false
 #| include: false
-source("R/datasim.R")
+#source("R/datasim.R")
+library(ggplot2)
+library(effects)
+library(glmmTMB)
+library(patchwork)
+library(psyphy)
+
 ts <- 16
 tc <- "black"
 ```
@@ -88,7 +94,16 @@ independent variable: age in years (`years`)
 
 dependent variable: (`variabile`)
 
-**aggiungi screenshot dataset**
+```{r sim1}
+#| echo: false
+set.seed(2)
+
+N = 200
+age = runif(N,6,10)
+y = runif(N, 4, 8)
+
+plot(age,y)
+```
 
 ## Linear model
 
@@ -97,7 +112,7 @@ using the classical linear predictor
 ```{r ex1fitL}
 #| echo: true
 #| eval: false
-fitL = glm(y~age, data=d)
+fit = lm(y~age, data=d)
 ```
 
 ## Linear model
@@ -108,7 +123,7 @@ what we dont see it bc its a default parameter but its actually hidden in our co
 #| echo: true
 #| eval: false
 #| code-fold: true
-fitL_explicit = glm(y~age, family=gaussian(link="identity"), data=d)
+fit = lm(y~age, family=gaussian(link="identity"), data=d)
 ```
 
 ::: fragment
@@ -130,7 +145,22 @@ independent variable: age in years (`years`)
 
 dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
 
-**aggiungi screenshot dataset**
+```{r sim2}
+#| echo: false
+
+set.seed(0)
+
+k = 60
+N = 400
+age = runif(N,6,10)
+eta = -5.5+age*0.9
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age,accuracy)
+
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point()
+```
 
 ## Linear model
 
@@ -139,44 +169,19 @@ using the classical linear predictor
 ```{r fitL}
 #| echo: true
 #| eval: false
-fitL = glm(accuracy~age, data=d)
+fit = lm(accuracy~age, data=d)
 ```
 
 ## Linear model
 
 ```{r fitL-plot}
-#| echo: true
-#| code-fold: true
-
-fitL <- glm(accuracy ~ age, data = d)
-
-effL <- data.frame(
-  allEffects(
-    fitL,
-    xlevels = list(age = seq(min(d$age), max(d$age), .05))
-  )[["age"]]
-)
-
-ggplot(d, aes(x = age, y = accuracy)) +
-  coord_cartesian(ylim = c(0, 1)) +
-  geom_point(size = 4, alpha = .5, color = "darkblue") +
-  geom_ribbon(
-    data = effL,
-    aes(x = age, ymin = lower, ymax = upper),
-    alpha = .3, fill = "darkred", color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effL,
-    aes(x = age, y = fit),
-    size = 2, color = "darkred",
-    inherit.aes = FALSE
-  ) +
-  theme(text = element_text(size = ts, color = "black")) +
-  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
-  scale_y_continuous(breaks = seq(0, 1, .1)) +
-  ylab("accuracy") + xlab("Age (years)")
-
+#| echo: false
+fit = lm(accuracy ~ age, data=d)
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
 ```
 
 ::: fragment
@@ -185,12 +190,18 @@ questo modello ci aiuta a predire i dati?
 
 ## Linear model
 
-no perché a 11 anni i bambini hanno accuratezza sminchiata
+no perché i nuovi dati simulati dal modello vanno chiaramente fuori dal range (0,1) di possibili valori per l'accuratezza
 
 ```{r fitP-plot2}
 #| echo: false
 
-# GRAFICO POSTERIOR PREDICTIVE CHECK 
+d$pp_sim = simulate(fit)$sim_1
+
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2) +
+  ylab("accuracy")
 
 ```
 
@@ -218,8 +229,7 @@ risposta: regressione logistica
 ```{r fitLogit}
 #| echo: true
 #| warning: false
-
-fitLogit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
+fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
 ```
 
 in this case, `link="logit"` makes sure that `y` spans from 0 and 1
@@ -227,39 +237,14 @@ in this case, `link="logit"` makes sure that `y` spans from 0 and 1
 ## ✅ More appropriate model 
 
 ```{r fitLogit-plot}
-#| echo: true
-#| code-fold: true
+#| echo: false
 #| warning: false
 
-effLogit <- data.frame(
-  allEffects(
-    fitLogit,
-    xlevels = list(age = seq(min(d$age), max(d$age), .05))
-  )[["age"]]
-)
-
-p1 <- ggplot(d, aes(x = age, y = accuracy)) +
-  coord_cartesian(ylim = c(0, 1)) +
-  geom_point(size = 4, alpha = .5, color = "darkblue") +
-  geom_ribbon(
-    data = effLogit,
-    aes(x = age, ymin = lower, ymax = upper),
-    alpha = .25, fill = "blue", color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effLogit,
-    aes(x = age, y = fit),
-    linewidth = 2, color = "blue",
-    inherit.aes = FALSE
-  ) +
-  theme(text = element_text(size = ts, color = "black")) +
-  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
-  scale_y_continuous(breaks = seq(0, 1, .1)) +
-  labs(y = "accuracy", x = "Age (years)")
-
-p1
-
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
 
 ```
 
@@ -279,126 +264,101 @@ dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
 ::: fragment
 **adding a new main effect**
 
-groups: normal kids (`group = 0`) vs kids with dyslexia (`group = 1`)
-:::
+groups: normal kids (`group = 0`) 
 
-## Identity link function
+kids with dyslexia (`group = 1`)
+::: 
 
-using an linear model `family=gaussian(link="identity")` a positive interaction emerges
+## Simulated dataset 2
 
-```{r fitLint}
-#| echo: true
-#| include: true
-#| warning: true
-fitLint = glm(accuracy ~ age*group, data=d)
-summary(fitLint)
+```{r sim2int}
+#| echo: false
+k = 50
+N = 1000
+group = rbinom(N,1,.5)
+age = runif(N,6,10)
+eta = -6+1*age-1*group
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age=age-mean(age),accuracy,group=as.factor(group))
+
+ggplot(d,aes(x=age,y=accuracy,color=group))+
+  geom_point()+
+  xlab("Age-centered")
 ```
 
 ## Identity link function
 
 ```{r fitLint-plot}
-#| echo: true
+#| echo: false
 #| warning: false
-#| code-fold: true
 
-d$group <- as.factor(d$group)
+fitLint <- glm(accuracy ~ age * group, data = d)
 
-eff_obj <- allEffects(
-  fitLint,
-  xlevels = list(age = seq(min(d$age), max(d$age), .05))
-)[["age:group"]]
+eff <- data.frame(
+  allEffects(
+    fitLint,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
 
-effL <- as.data.frame(eff_obj)
-
-if (!("fit" %in% names(effL))) {
-  pred_col <- intersect(c("fit", "response", "fitted", "yhat"), names(effL))
-  if (length(pred_col) == 0) stop("Nessuna colonna di predizione trovata in effL.")
-  effL$fit <- effL[[pred_col[1]]]
-}
-
-ggplot(d, aes(x = age, y = accuracy, shape = group, color = group)) +
-  geom_point(size = 4, alpha = .6) +
-  geom_ribbon(
-    data = effL,
-    aes(x = age, ymin = lower, ymax = upper, fill = group, group = group),
-    alpha = .3,
-    color = NA,
-    inherit.aes = FALSE
-  ) +
-  geom_line(
-    data = effL,
-    aes(x = age, y = fit, color = group, group = group),
-    linewidth = 2,
-    inherit.aes = FALSE
-  ) +
-  scale_color_manual(values = c("darkorange3", "darkgreen")) +
-  scale_fill_manual(values = c("darkorange3", "darkgreen")) +
-  theme(text = element_text(size = ts, color = tc)) +
-  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
-  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(0, 1)) +
-  labs(y = "Accuracy", x = "Age (years)")
-
+ggplot(d, aes(x = age, y = accuracy, color = group)) +
+  geom_point(alpha = .6) +
+  geom_line(data = eff, aes(x = age, y = fit, group = group), size = 2) +
+  xlab("Age-centered")
 
 ```
 
-## Logit link function
+## Identity link function
 
-using an linear model `family=binomial(link="logit")` a negative interaction emerges
+a positive interaction emerges
 
-```{r fitLogitint}
+```{r fitLint}
 #| echo: true
 #| include: true
-#| warning: false
-
-fitLogitint = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"),
-          weights= rep(k, nrow(d)))
-summary(fitLogitint)
+#| warning: true
+fit = glm(accuracy ~ age*group, data=d)
+summary(fit)
 ```
 
 ## Logit link function
 
 ```{r fitLogitint-plot}
-#| echo: true
-#| code-fold: true
-#| eval: false
+#| echo: false
+#| warning: false
 
-fitLogitint <- glm(
-  accuracy ~ age * group,
-  data = d,
-  family = binomial(link = "logit"),
-  weights = rep(k, nrow(d))
-)
+fitLogitint = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"),
+          weights= rep(k, nrow(d)))
 
-effP <- data.frame(
+eff <- data.frame(
   allEffects(
     fitLogitint,
     xlevels = list(age = seq(min(d$age), max(d$age), .05))
   )[["age:group"]]
 )
 
-effP$group <- as.factor(effP$group)
-
-ggplot(d, aes(x = age, y = accuracy, shape = group, color = group)) +
-  geom_point(size = 4, alpha = .6) +
-  geom_ribbon(
-    data = effP,
-    aes(x = age, ymin = lower, ymax = upper, group = group, fill = group),
-    alpha = .3, color = NA,
-    inherit.aes = FALSE
-  ) +
+ggplot(d, aes(x = age, y = accuracy, color = group)) +
+  geom_point(alpha = .6) +
   geom_line(
-    data = effP,
-    aes(x = age, y = fit, group = group, linetype = group, color = group),
-    linewidth = 2,
-    inherit.aes = FALSE
+    data = eff,
+    aes(x = age, y = fit, group = group),
+    size = 2
   ) +
-  scale_color_manual(values = c("darkorange2", "darkgreen")) +
-  scale_fill_manual(values = c("darkorange2", "darkgreen")) +
-  theme(text = element_text(size = ts, color = "black")) +
-  scale_x_continuous(breaks = seq(floor(min(d$age)), ceiling(max(d$age)), .5)) +
-  scale_y_continuous(breaks = seq(0, 1, .1), limits = c(0, 1)) +
-  ylab("accuracy") + xlab("Age (years)")
+  xlab("Age-centered")
 
+```
+
+## Logit link function
+
+a negative interaction emerges
+
+```{r fitLogitint}
+#| echo: true
+#| include: true
+#| warning: false
+
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
+summary(fit)
 ```
 
 ::: notes
@@ -426,28 +386,45 @@ pertanto, anche se la family è giusta (perché ci permette di predire sempre va
 il link in questione si chiama e ve lo mostro nel modello
 :::
 
-## il vero modello in grado di fittare i dati: link="mafc.probit"
+## il vero modello in grado di fittare i dati
 
 let's try out the multiple alternative forced choice (50% - bc of the true/false) probit link
 
-```{r fitMint1}
-#| echo: true
-#| eval: false
+```{r fitMint-plot}
+#| echo: false
+#| warning: false
+
 fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+
+eff <- data.frame(
+  allEffects(
+    fitM,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
+
+ggplot(d, aes(x = age, y = accuracy, color = group)) +
+  geom_point(alpha = .6) +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, group = group),
+    size = 2
+  ) +
+  xlab("Age-centered")
 
 ```
 
 ## il vero modello in grado di fittare i dati: link="mafc.probit"
 
-using an linear model `family=binomial(link="mafc.probit")` no interaction emerges !!!! as it should be
+no interaction emerges !!!! as it should
 
-```{r fitMint2}
+```{r fitMint}
 #| echo: true
 #| warning: true
 
-fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
 
-summary(fitM)
+summary(fit)
 ```
 
 # 4 Why interactions
@@ -627,21 +604,79 @@ Special thanks to
 
 # Supplementary materials
 
-## POSTERIOR PREDICTIVE CHECK LOGITI
+```{r sim2sup}
+#| echo: false
+set.seed(0)
 
-```{r sup1}
+k = 60
+N = 400
+age = runif(N,6,10)
+eta = -5.5+age*0.9
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age,accuracy)
+```
+
+## Posterior predictive check link="logit"
+
+```{r sup3}
 #| echo: false
 
-# GRAFICO POSTERIOR PREDICTIVE CHECK LOGIT
+fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"),
+          weights= rep(k, nrow(d)))
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+
+d$pp_sim = simulate(fit)$sim_1
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
 
 ```
 
-## Probit link function 
+## Posterior predictive check link="probit"
+
+```{r sup1}
+#| echo: true
+#| warning: false
+fit = glm(accuracy ~ age, data=d, family=binomial(link="probit"), weights= rep(k, nrow(d)))
+```
 
 ```{r sup2}
-#| echo: true
+#| echo: false
 
-fitPint = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
-          weights= rep(k, nrow(d)))
-summary(fitPint)
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+
+d$pp_sim = simulate(fit)$sim_1
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2)
+
+```
+
+## Interaction with link="probit"
+
+a negative interaction emerges
+
+```{r sim2intsup}
+#| echo: false
+set.seed(0)
+
+k = 50
+N = 1000
+group = rbinom(N,1,.5)
+age = runif(N,6,10)
+eta = -6+1*age-1*group
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age=age-mean(age),accuracy,group=as.factor(group))
+```
+
+```{r sup4}
+#| echo: true
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"), weights= rep(k, nrow(d)))
+summary(fit)
 ```
