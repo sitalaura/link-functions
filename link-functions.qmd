@@ -70,6 +70,7 @@ include-in-header:
 #| echo: false
 #| include: false
 #source("R/datasim.R")
+
 library(ggplot2)
 library(effects)
 library(glmmTMB)
@@ -98,11 +99,15 @@ dependent variable: (`variabile`)
 #| echo: false
 set.seed(2)
 
-N = 200
-age = runif(N,6,10)
-y = runif(N, 4, 8)
+N <- 200
+age <- runif(N, 6, 10)
+r <- 0.7
+age_z <- scale(age)
+y <- r * age_z + sqrt(1 - r^2) * rnorm(N)
+d <- data.frame(age, y)
 
-plot(age,y)
+ggplot(d,aes(x=age,y=y))+
+  geom_point()
 ```
 
 ## Linear model
@@ -123,7 +128,7 @@ what we dont see it bc its a default parameter but its actually hidden in our co
 #| echo: true
 #| eval: false
 #| code-fold: true
-fit = lm(y~age, family=gaussian(link="identity"), data=d)
+fit = glm(y~age, family=gaussian(link="identity"), data=d)
 ```
 
 ::: fragment
@@ -184,13 +189,14 @@ ggplot(d,aes(x=age,y=accuracy))+
   geom_line(data=eff,color="red",size=2)
 ```
 
-::: fragment
+::: notes
 questo modello ci aiuta a predire i dati?
+per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
 :::
 
 ## Linear model
 
-no perché i nuovi dati simulati dal modello vanno chiaramente fuori dal range (0,1) di possibili valori per l'accuratezza
+i nuovi dati simulati dal modello vanno chiaramente fuori dal range (0,1) di possibili valori per l'accuratezza
 
 ```{r fitP-plot2}
 #| echo: false
@@ -222,22 +228,14 @@ domanda: quindi, che modello facciamo?
 risposta: regressione logistica
 :::
 
-
-## ✅ More appropriate model 
-
-```{r fitLogit}
-#| echo: true
-#| warning: false
-fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
-```
-
-in this case, `link="logit"` makes sure that `y` spans from 0 and 1
-
 ## ✅ More appropriate model 
 
 ```{r fitLogit-plot}
 #| echo: false
 #| warning: false
+
+fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"),
+          weights= rep(k, nrow(d)))
 
 eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
 eff$accuracy = eff$fit
@@ -250,7 +248,34 @@ ggplot(d,aes(x=age,y=accuracy))+
 ::: notes
 vediamo graficamente che il modello predice bene i dati nuovi
 ci permette di predire nuovi outcome compresi tra 0 e 1
+e se facciamo lo stesso trick vediamo che il nuovo dataset, viola, presenta valori che stanno nel range di valori possibili per la nostra vd
 :::
+
+## ✅ More appropriate model 
+
+```{r sup3}
+#| echo: false
+
+eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
+eff$accuracy = eff$fit
+
+d$pp_sim = simulate(fit)$sim_1
+ggplot(d,aes(x=age,y=accuracy))+
+  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
+  geom_point()+
+  geom_line(data=eff,color="red",size=2) +
+  ylab("accuracy")
+```
+
+## ✅ More appropriate model 
+
+```{r fitLogit}
+#| echo: true
+#| warning: false
+fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
+```
+
+in this case, `link="logit"` makes sure that `y` spans from 0 and 1
 
 # 3 Studying interactions
 
@@ -310,7 +335,7 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 
 ## Identity link function
 
-a positive interaction emerges
+a **positive** interaction emerges
 
 ```{r fitLint}
 #| echo: true
@@ -349,7 +374,7 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 
 ## Logit link function
 
-a negative interaction emerges
+a **negative** interaction emerges
 
 ```{r fitLogitint}
 #| echo: true
@@ -370,13 +395,25 @@ e perché?
 
 ```{r datasim}
 #| echo: true
-#| include: true
-#| code-folder: true
+#| code-fold: true
 
-#codice della simulazione 
+k = 50
+N = 1000
+group = rbinom(N,1,.5)
+age = runif(N,6,10)
+eta = -6+1*age-1*group
+probs = mafc.probit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+d = data.frame(age=age-mean(age),accuracy,group=as.factor(group))
+
+ggplot(d,aes(x=age,y=accuracy,color=group))+
+  geom_point()+
+  xlab("Age-centered")
 ```
 
+::: fragment
 non ho simulato un'interazione, quindi ENTRAMBI i modelli trovano un'interazione che non c'è.
+::: 
 
 ::: notes
 sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica?
@@ -387,7 +424,7 @@ il link in questione si chiama e ve lo mostro nel modello
 
 ## il vero modello in grado di fittare i dati
 
-let's try out the multiple alternative forced choice (50% - bc of the true/false) probit link
+let's try out the **multiple alternative forced choice** (50% - bc of the true/false) probit link
 
 ```{r fitMint-plot}
 #| echo: false
@@ -568,7 +605,9 @@ choosing the more appropriate **link function**: otherwise it's very likely you 
 
 ##
 
-We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction: so far, quite often
+We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction
+
+so far, quite often
 
 ## Materials & Contact
 
@@ -615,24 +654,6 @@ accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
 ```
 
-## Posterior predictive check link="logit"
-
-```{r sup3}
-#| echo: false
-
-fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"),
-          weights= rep(k, nrow(d)))
-eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
-eff$accuracy = eff$fit
-
-d$pp_sim = simulate(fit)$sim_1
-ggplot(d,aes(x=age,y=accuracy))+
-  geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
-  geom_point()+
-  geom_line(data=eff,color="red",size=2) +
-  ylab("accuracy")
-```
-
 ## Posterior predictive check link="probit"
 
 ```{r sup1}
@@ -657,7 +678,7 @@ ggplot(d,aes(x=age,y=accuracy))+
 
 ## Interaction with link="probit"
 
-a negative interaction emerges
+a **negative** interaction emerges
 
 ```{r sim2intsup}
 #| echo: false
