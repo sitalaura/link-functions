@@ -278,9 +278,9 @@ independent variable: age in years (`years`)
 dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
 
 ::: fragment
-**adding a new main effect**
+**adding a new main effect: groups**
 
-groups: normal kids (`group = 0`) 
+normal kids (`group = 0`) 
 
 kids with dyslexia (`group = 1`)
 ::: 
