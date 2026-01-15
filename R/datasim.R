@@ -1,23 +1,12 @@
-# datasim
+# libraries
 library(ggplot2)
 library(effects)
-library(glmmTMB)
-library(patchwork)
 library(psyphy)
 
-set.seed(2)
-
-k = 50
-N = 200
-age = runif(N,6,10)
-accuracy = rbinom(n=N, size=k, prob=plogis(-4.5+age*0.9))/k
-plot(age,accuracy)
-
-###################################
+# simulation w/ 1 independent variable
 
 set.seed(0)
 
-# un solo gruppo
 k = 60
 N = 400
 age = runif(N,6,10)
@@ -26,7 +15,7 @@ probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
 
-# modello sbagliato
+# linear model
 
 fit = lm(accuracy ~ age, data=d)
 eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
@@ -46,7 +35,7 @@ ggplot(d,aes(x=accuracy))+
   geom_histogram(aes(x=pp_sim,y=after_stat(density)),color=NA,fill="purple",alpha=.4)
 
 
-# modello adeguato
+# logistic regression model
 
 fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"),
           weights= rep(k, nrow(d)))
@@ -69,7 +58,9 @@ ggplot(d,aes(x=accuracy))+
 
 ###################################
 
-# aggiungiamo secondo gruppo
+# simulation w/ 2 independent variables
+set.seed(0) 
+
 k = 50
 N = 1000
 group = rbinom(N,1,.5)
@@ -77,13 +68,19 @@ age = runif(N,6,10)
 eta = -6+1*age-1*group
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
-d = data.frame(age=age-mean(age),accuracy,group=as.factor(group))
-ggplot(d,aes(x=age,y=accuracy,color=group))+
-  geom_point()+
-  xlab("Age-centered")
 
+d = data.frame(
+  age = age,
+  age_c = age - mean(age),
+  accuracy = accuracy,
+  group = as.factor(group)
+)
 
-# identity
+ggplot(d, aes(x = age, y = accuracy, color = group)) +
+  geom_point() +
+  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1))
+
+# identity link
 fit = glm(accuracy ~ age*group, data=d)
 summary(fit)
 
