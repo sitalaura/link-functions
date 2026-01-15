@@ -202,7 +202,6 @@ ggplot(d,aes(x=age,y=accuracy))+
   geom_point()+
   geom_line(data=eff,color="red",size=2) +
   ylab("accuracy")
-
 ```
 
 ## ❌ Inappropriate model
@@ -423,7 +422,6 @@ no interaction emerges !!!! as it should
 #| warning: true
 
 fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
-
 summary(fit)
 ```
 
@@ -631,8 +629,8 @@ d$pp_sim = simulate(fit)$sim_1
 ggplot(d,aes(x=age,y=accuracy))+
   geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
   geom_point()+
-  geom_line(data=eff,color="red",size=2)
-
+  geom_line(data=eff,color="red",size=2) +
+  ylab("accuracy")
 ```
 
 ## Posterior predictive check link="probit"
@@ -653,8 +651,8 @@ d$pp_sim = simulate(fit)$sim_1
 ggplot(d,aes(x=age,y=accuracy))+
   geom_point(aes(x=age,y=pp_sim),color="purple",size=3.5,alpha=.4)+
   geom_point()+
-  geom_line(data=eff,color="red",size=2)
-
+  geom_line(data=eff,color="red",size=2) +
+  ylab("accuracy")
 ```
 
 ## Interaction with link="probit"
