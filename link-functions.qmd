@@ -7,9 +7,8 @@ format:
     embed-resources: true
     slide-number: true
     footer: "Cognitive Science Arena 2026"
-    # theme: night
     output-file: "link-functions.html"
-toc: true
+toc: false
 execute:
   cache: false
   freeze: false
@@ -19,24 +18,38 @@ include-in-header:
       /* Titolo slide di copertina */
       #title-slide .title {
         font-size: 1.5em;
-       <!-- color: #900000; --> 
       }
 
-      /* Logo nella copertina */
+      /* Loghi nella copertina:
+         - Psicostat: più grande, leggermente più verso il centro
+         - UNIPD: più piccolo, più a destra
+      */
       #title-slide::after {
         content: "";
         display: block;
-        background-image: url("images/logo.png");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-        height: 250px;
+        width: 100%;
+        height: 240px;
         margin-top: 1.5em;
+
+        background-image:
+          url("images/logo.png"),
+          url("images/logo-UNIPD.bmp");
+
+        background-repeat: no-repeat, no-repeat;
+
+        /* posizione orizzontale e verticale */
+        background-position:
+          25% center,   /* Psicostat */
+          85% center;   /* UNIPD */
+
+        /* dimensioni indipendenti */
+        background-size:
+          180px auto,   /* Psicostat (più grande) */
+          450px auto;   /* UNIPD (più piccolo) */
       }
 
       /* Titoli interni delle slide */
       .reveal h1, .reveal h2, .reveal h3 {
-      <!--  color: #900000 !important; -->
       }
 
       /* Dimensione leggermente minore per h2 */
@@ -51,10 +64,13 @@ include-in-header:
       }
 
       /* footer centrato */
-       .reveal .slide-footer,
+      .reveal .slide-footer,
       .reveal .footer,
       .reveal .revealjs-footer {
-        position: fixed; left: 0; right: 0; bottom: 10px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 10px;
         width: 100%;
         display: flex !important;
         justify-content: center !important;
@@ -63,8 +79,6 @@ include-in-header:
       }
       </style>
 ---
-
-# 
 
 ```{r source}
 #| echo: false
@@ -112,6 +126,21 @@ using the classical linear predictor
 fit = lm(y~age, data=d)
 ```
 
+::: fragment
+```{r ex1fitL-plot}
+#| echo: false
+eff <- data.frame(age = seq(min(age), max(age), length.out = 100))
+
+fit <- lm(y ~ age, data = d)
+eff$y <- predict(fit, newdata = eff)
+
+ggplot(d, aes(x = age, y = y)) +
+  geom_point() +
+  geom_line(data = eff, aes(x = age, y = y),
+            color = "red", linewidth = 2)
+```
+:::
+
 ## Linear model
 
 what we dont see it bc its a default parameter but its actually hidden in our code:
@@ -132,7 +161,6 @@ the model uses family gaussian and the identity link function
 
 to the appropriate range of the response variable Y
 :::
-
 
 # 2 Example
 
@@ -182,8 +210,7 @@ fit = lm(accuracy~age, data=d)
 ```
 
 ::: notes
-questo modello ci aiuta a predire i dati?
-per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
+questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
 :::
 
 ## Linear model
@@ -215,12 +242,10 @@ here an identity link is NOT appropriate bc
 :::
 
 ::: notes
-al pubblico: dobbiamo quindi cambiare modello, perché quello lineare non aiuta a predire nuovi dati CIOE non tiene conto dei bound dei data (0 e 1)
-domanda: quindi, che modello facciamo? 
-risposta: regressione logistica
+al pubblico: dobbiamo quindi cambiare modello, perché quello lineare non aiuta a predire nuovi dati CIOE non tiene conto dei bound dei data (0 e 1) domanda: quindi, che modello facciamo? risposta: regressione logistica
 :::
 
-## ✅ More appropriate model 
+## ✅ More appropriate model
 
 ```{r fitLogit-plot}
 #| echo: false
@@ -238,12 +263,10 @@ ggplot(d,aes(x=age,y=accuracy))+
 ```
 
 ::: notes
-vediamo graficamente che il modello predice bene i dati nuovi
-ci permette di predire nuovi outcome compresi tra 0 e 1
-e se facciamo lo stesso trick vediamo che il nuovo dataset, viola, presenta valori che stanno nel range di valori possibili per la nostra vd
+vediamo graficamente che il modello predice bene i dati nuovi ci permette di predire nuovi outcome compresi tra 0 e 1 e se facciamo lo stesso trick vediamo che il nuovo dataset, viola, presenta valori che stanno nel range di valori possibili per la nostra vd
 :::
 
-## ✅ More appropriate model 
+## ✅ More appropriate model
 
 ```{r sup3}
 #| echo: false
@@ -259,7 +282,7 @@ ggplot(d,aes(x=age,y=accuracy))+
   ylab("accuracy")
 ```
 
-## ✅ More appropriate model 
+## ✅ More appropriate model
 
 ```{r fitLogit}
 #| echo: true
@@ -280,10 +303,10 @@ dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
 ::: fragment
 **adding a new main effect: groups**
 
-normal kids (`group = 0`) 
+normal kids (`group = 0`)
 
 kids with dyslexia (`group = 1`)
-::: 
+:::
 
 ## Simulated dataset 2
 
@@ -384,9 +407,7 @@ summary(fit)
 ```
 
 ::: notes
-domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulato? o nessuno dei due?
-riformula la domanda: in termini dell'esempio tipo all'aumentare dell'età,... 
-e perché?
+domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulato? o nessuno dei due? riformula la domanda: in termini dell'esempio tipo all'aumentare dell'età,... e perché?
 :::
 
 ## cosa ho effettivamente simulato
@@ -417,13 +438,10 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 
 ::: fragment
 non ho simulato un'interazione, quindi ENTRAMBI i modelli trovano un'interazione che non c'è.
-::: 
+:::
 
 ::: notes
-sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica?
-risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0%
-pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. 
-il link in questione si chiama e ve lo mostro nel modello
+sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica? risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0% pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. il link in questione si chiama e ve lo mostro nel modello
 :::
 
 ## il vero modello in grado di fittare i dati
@@ -638,7 +656,7 @@ choosing the more appropriate **family of distributions** to make sure that the 
 
 choosing the more appropriate **link function**: otherwise it's very likely you end up finding non linear effects (ie interactions) that are not there!
 
-##
+## 
 
 We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction
 
@@ -646,28 +664,44 @@ so far, quite often
 
 ## Materials & Contact
 
-All materials are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
+Data simulation, code and presentation are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
 
 Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
 
-![](images/logo.png){fig-align="center" width="2.4cm"}
+::::: columns
+::: {.column width="45%"}
+![](images/logo.png){fig-align="center" width="220"}
+:::
+
+::: {.column width="55%"}
+![](images/logo-UNIPD.bmp){fig-align="center" width="700"}
+:::
+:::::
 
 ## Bibliography
 
 <p style="font-size:70%; text-align:left; line-height:1.2;">
+
 Domingue, B. W., Kanopka, K., Trejo, S., Rhemtulla, M., & Tucker-Drob, E. M. (2024). Ubiquitous bias and false discovery due to model misspecification in analysis of statistical interactions: The role of the outcome’s distribution and metric properties. *Psychological methods, 29*(6), 1164.
+
 </p>
 
 <p style="font-size:70%; text-align:left; line-height:1.2;">
+
 Hardwicke, T. E., Thibault, R. T., Clarke, B., Moodie, N., Crüwell, S., Schiavone, S. R., Handcock, S. A., Nghiem, K. A., Mody, F., Eerola, T., et al. (2024). Prevalence of transparent research practices in psychology: A cross-sectional study of empirical articles published in 2022. *Advances in Methods and Practices in Psychological Science, 7* (4), 25152459241283477.
+
 </p>
 
 <p style="font-size:70%; text-align:left; line-height:1.2;">
+
 Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong?. *Journal of Experimental Social Psychology, 79*, 328-348.
+
 </p>
 
 <p style="font-size:70%; text-align:left; line-height:1.2;">
+
 Micceri, T. (1989). The unicorn, the normal curve, and other improbable creatures. *Psychological bulletin, 105*(1), 156.
+
 </p>
 
 ## Thank you
