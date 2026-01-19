@@ -466,7 +466,7 @@ summary(fit)
 
 # 4 Why interactions
 
-## Identity link function
+## `link="identity"`
 
 equal intervals on X correspond to equal intervals on Y
 
@@ -509,8 +509,7 @@ ggplot(df_line, aes(x = x, y = y)) +
     limits = c(-4.5, 4.5),
     breaks = y_vals
   ) +
-  
-  # Etichette
+
   labs(
     x = "Linear component of the model",
     y = "Dependent variable"
@@ -524,7 +523,7 @@ ggplot(df_line, aes(x = x, y = y)) +
   )
 ```
 
-## ✅ Log link function
+## `link="logit"`
 
 equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
 
@@ -533,15 +532,16 @@ equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
 #| warning: false
 #| fig.align: "center" 
 
-df <- data.frame(
-  x = seq(-2.2, 1.6, length.out = 300)
+df_line <- data.frame(
+  x = seq(-5, 5, length.out = 400)
 )
-df$y <- exp(df$x)
+df_line$y <- plogis(df_line$x)
 
-x_vals <- seq(-1.5, 1.5, by = 0.5)
-y_vals <- exp(x_vals)
+x_vals <- -4:4
+y_vals <- plogis(x_vals)
 
-ggplot(df, aes(x = x, y = y)) +
+ggplot(df_line, aes(x = x, y = y)) +
+
   geom_hline(
     yintercept = y_vals,
     color = "grey60",
@@ -557,41 +557,74 @@ ggplot(df, aes(x = x, y = y)) +
     color = "blue",
     linewidth = 2
   ) +
-  annotate(
-    "text",
-    x = -2.25,
-    y = y_vals,
-    label = paste("y =", round(y_vals, 2)),
-    hjust = 1,
-    size = 4
-  ) +
-  annotate(
-    "text",
-    x = x_vals,
-    y = -0.08,
-    label = paste("x =", x_vals),
-    vjust = 1,
-    size = 4
-  ) +
+  
   scale_x_continuous(
-    limits = c(-2.2, 1.6),
+    limits = c(-4.5, 4.5),
     breaks = x_vals
   ) +
+  
   scale_y_continuous(
-    limits = c(0, max(y_vals) + 0.8),
-    breaks = y_vals
+    limits = c(0, 1),
+    breaks = round(y_vals, 2),
+    labels = round(y_vals, 2)
   ) +
+  
   labs(
     x = "Linear component of the model",
-    y = "Dependent variable (ie error rate)"
+    y = "Accuracy"
   ) +
+  
   theme_minimal(base_size = 18) +
   theme(
     axis.title = element_text(size = 18),
     axis.text = element_text(size = 14)
   )
+
 ```
 
+## `link=mafc.probit(2)`
+
+equal intervals on X do NOT correspond to equal intervals on Y
+
+```{r macflink}
+#| echo: false
+#| warning: false
+#| fig.align: "center" 
+
+mafc_probit_linkinv <- function(x, m) {
+  g <- 1 / m
+  g + (1 - g) * pnorm(x)
+}
+
+df_line <- data.frame(x = seq(-4.5, 4.5, length.out = 400))
+df_line$y <- mafc_probit_linkinv(df_line$x, m = 2)
+
+x_vals <- -4:4
+y_vals <- mafc_probit_linkinv(x_vals, m = 2)
+
+y_breaks <- mafc_probit_linkinv(c(-4, -1, 0, 1, 2, 3, 4), m = 2)
+y_breaks <- round(y_breaks, 2)
+
+y_breaks <- y_breaks[y_breaks < 1]
+y_breaks <- c(y_breaks, 0.99)
+
+ggplot(df_line, aes(x = x, y = y)) +
+  geom_hline(yintercept = y_vals, color = "grey60", linewidth = 0.6) +
+  geom_vline(xintercept = x_vals, color = "red", linetype = "dashed", linewidth = 0.6) +
+  geom_line(color = "blue", linewidth = 2) +
+  geom_hline(yintercept = 1/2, linewidth = 1) +
+  scale_x_continuous(limits = c(-4.5, 4.5), breaks = x_vals) +
+  scale_y_continuous(
+    limits = c(0.25, 1),
+    breaks = y_breaks,
+    labels = y_breaks
+  ) +
+  labs(x = "Linear component of the model", y = "Accuracy") +
+  theme_minimal(base_size = 18) +
+  theme(axis.title = element_text(size = 18), axis.text = element_text(size = 14))
+
+
+```
 
 # Conclusions
 
