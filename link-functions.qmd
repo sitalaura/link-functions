@@ -157,10 +157,12 @@ the model uses family gaussian and the identity link function
 :::
 
 ::: fragment
-**link function** in GLMs transforms (re-map) the linear predictor X
+**link function** in GLMs transforms (re-map) the linear predictor^[often called $\eta$ - in our example: $\eta = \beta_0 + \beta_1 \cdot age$]
 
 to the appropriate range of the response variable Y
 :::
+
+
 
 # 2 Example
 
@@ -215,7 +217,7 @@ questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo que
 
 ## Linear model
 
-i nuovi dati simulati dal modello vanno chiaramente fuori dal range (0,1) di possibili valori per l'accuratezza
+i nuovi dati simulati dal modello vanno chiaramente fuori dal range [0,1] di possibili valori per l'accuratezza
 
 ```{r fitP-plot2}
 #| echo: false
@@ -263,7 +265,7 @@ ggplot(d,aes(x=age,y=accuracy))+
 ```
 
 ::: notes
-vediamo graficamente che il modello predice bene i dati nuovi ci permette di predire nuovi outcome compresi tra 0 e 1 e se facciamo lo stesso trick vediamo che il nuovo dataset, viola, presenta valori che stanno nel range di valori possibili per la nostra vd
+vediamo graficamente che il modello ci permette di predire nuovi outcome compresi tra 0 e 1 e se facciamo lo stesso trick vediamo che il nuovo dataset, viola, presenta valori che stanno nel range di valori possibili per la nostra vd
 :::
 
 ## ✅ More appropriate model
