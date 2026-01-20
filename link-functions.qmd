@@ -490,7 +490,7 @@ summary(fit)
 
 equal intervals on X correspond to equal intervals on Y
 
-su x ed y metti i nomi delle variabili dell'esempio
+su y metti i nomi delle variabili dell'esempio
 
 ```{r idlink}
 #| echo: false
@@ -682,19 +682,19 @@ Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_
 
 ## Bibliography
 
-<p style="font-size:70%; text-align:left; line-height:1.2;">
+<p style="font-size:70%; text-align:left; line-height:1.2; padding-left:1.5em; text-indent:-1.5em;">
 Domingue, B. W., Kanopka, K., Trejo, S., Rhemtulla, M., & Tucker-Drob, E. M. (2024). Ubiquitous bias and false discovery due to model misspecification in analysis of statistical interactions: The role of the outcome’s distribution and metric properties. *Psychological methods, 29*(6), 1164.
 </p>
 
-<p style="font-size:70%; text-align:left; line-height:1.2;">
+<p style="font-size:70%; text-align:left; line-height:1.2; padding-left:1.5em; text-indent:-1.5em;">
 Hardwicke, T. E., Thibault, R. T., Clarke, B., Moodie, N., Crüwell, S., Schiavone, S. R., Handcock, S. A., Nghiem, K. A., Mody, F., Eerola, T., et al. (2024). Prevalence of transparent research practices in psychology: A cross-sectional study of empirical articles published in 2022. *Advances in Methods and Practices in Psychological Science, 7* (4), 25152459241283477.
 </p>
 
-<p style="font-size:70%; text-align:left; line-height:1.2;">
+<p style="font-size:70%; text-align:left; line-height:1.2; padding-left:1.5em; text-indent:-1.5em;">
 Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong?. *Journal of Experimental Social Psychology, 79*, 328-348.
 </p>
 
-<p style="font-size:70%; text-align:left; line-height:1.2;">
+<p style="font-size:70%; text-align:left; line-height:1.2; padding-left:1.5em; text-indent:-1.5em;">
 Micceri, T. (1989). The unicorn, the normal curve, and other improbable creatures. *Psychological bulletin, 105*(1), 156.
 </p>
 
