@@ -1,0 +1,108 @@
+/*-- scss:defaults --*/
+
+// fonts
+$font-family-sans-serif: "Palatino Linotype", "Book Antiqua", Palatino,
+  FreeSerif, serif !default;
+$presentation-font-size-root: 34px;
+
+// headings
+$presentation-heading-font: "Palatino Linotype", "Book Antiqua", Palatino,
+  FreeSerif, serif !default;
+$presentation-h1-font-size: 1.8em;
+$presentation-h2-font-size: 1.4em;
+$presentation-h3-font-size: 1.2em;
+
+// code
+$code-block-font-size: 0.70em;
+
+$callout-style-font-size: .5em;
+$callout-style-font-weight: 400;
+
+
+/*-- scss:rules --*/
+
+/* Link spacing */
+.reveal a {
+  line-height: 1.3em;
+}
+
+/* Logo (slide-logo) */
+.reveal .slide-logo {
+  height: 100px !important;
+  max-height: none !important;
+  width: auto !important;
+}
+
+/* ========== Font scaling per slide ========== */
+/* Slide con pochissimo testo (headline / takeaway) */
+.reveal .slide.hero {
+  font-size: 1.20em;
+}
+
+/* Slide un po’ più dense (usa con parsimonia) */
+.reveal .slide.small {
+  font-size: 0.92em;
+}
+
+/* ========== Cover (title slide) ========== */
+/* Titolo slide di copertina */
+#title-slide .title {
+  font-size: 1.5em;
+}
+
+/* Loghi nella copertina:
+   - Psicostat: più grande, leggermente più verso il centro
+   - UNIPD: più piccolo, più a destra
+*/
+#title-slide::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 240px;
+  margin-top: 1.5em;
+
+  background-image:
+    url("images/logo.png"),
+    url("images/logo-UNIPD.bmp");
+
+  background-repeat: no-repeat, no-repeat;
+
+  /* posizione orizzontale e verticale */
+  background-position:
+    25% center,   /* Psicostat */
+    85% center;   /* UNIPD */
+
+  /* dimensioni indipendenti */
+  background-size:
+    180px auto,   /* Psicostat */
+    450px auto;   /* UNIPD */
+}
+
+/* ========== Typography ========== */
+/* Dimensione leggermente minore per h2 */
+.reveal h2 {
+  font-size: 1.2em !important;
+}
+
+/* testo giustificato */
+.reveal p,
+.reveal li {
+  text-align: justify !important;
+  text-justify: inter-word;
+}
+
+/* ========== Footer ========== */
+/* footer centrato */
+.reveal .slide-footer,
+.reveal .footer,
+.reveal .revealjs-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  width: 100%;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}

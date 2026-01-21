@@ -3,6 +3,7 @@ title: "Are we getting interactions wrong? <br> The role of link functions <br> 
 authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, <br> Filippo Gambarota, Enrico Toffalini"
 format:
   revealjs:
+    theme: custom.scss
     center: true
     embed-resources: true
     slide-number: true
@@ -12,72 +13,6 @@ toc: false
 execute:
   cache: false
   freeze: false
-include-in-header:
-  - text: |
-      <style>
-      /* Titolo slide di copertina */
-      #title-slide .title {
-        font-size: 1.5em;
-      }
-
-      /* Loghi nella copertina:
-         - Psicostat: più grande, leggermente più verso il centro
-         - UNIPD: più piccolo, più a destra
-      */
-      #title-slide::after {
-        content: "";
-        display: block;
-        width: 100%;
-        height: 240px;
-        margin-top: 1.5em;
-
-        background-image:
-          url("images/logo.png"),
-          url("images/logo-UNIPD.bmp");
-
-        background-repeat: no-repeat, no-repeat;
-
-        /* posizione orizzontale e verticale */
-        background-position:
-          25% center,   /* Psicostat */
-          85% center;   /* UNIPD */
-
-        /* dimensioni indipendenti */
-        background-size:
-          180px auto,   /* Psicostat (più grande) */
-          450px auto;   /* UNIPD (più piccolo) */
-      }
-
-      /* Titoli interni delle slide */
-      .reveal h1, .reveal h2, .reveal h3 {
-      }
-
-      /* Dimensione leggermente minore per h2 */
-      .reveal h2 {
-        font-size: 1.2em !important;
-      }
-
-      /* testo giustificato */
-      .reveal p, .reveal li {
-        text-align: justify !important;
-        text-justify: inter-word;
-      }
-
-      /* footer centrato */
-      .reveal .slide-footer,
-      .reveal .footer,
-      .reveal .revealjs-footer {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 10px;
-        width: 100%;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        text-align: center !important;
-      }
-      </style>
 ---
 
 ```{r source}
