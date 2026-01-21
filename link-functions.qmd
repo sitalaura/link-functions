@@ -1,6 +1,12 @@
 ---
 title: "Are we getting interactions wrong? <br> The role of link functions <br> in psychological research"
 authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, <br> Filippo Gambarota, Enrico Toffalini"
+subtitle: |
+  <br>
+  <div style="display:flex; justify-content:center; align-items:center;">
+    <img src="images/logo.png" style="height:155px; margin-right:3cm;">
+    <img src="images/logo-UNIPD.bmp" style="height:150px;">
+  </div>
 format:
   revealjs:
     theme: custom.scss
@@ -9,6 +15,7 @@ format:
     slide-number: true
     footer: "Cognitive Science Arena 2026"
     output-file: "link-functions.html"
+    controls: false
 toc: false
 execute:
   cache: false
@@ -605,13 +612,15 @@ Data simulation, code and presentation are available on GitHub at <a href="https
 
 Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
 
+\vspace{1cm}
+
 ::::: columns
 ::: {.column width="45%"}
-![](images/logo.png){fig-align="center" width="220"}
+![](images/logo.png){fig-align="center" width="180"}
 :::
 
 ::: {.column width="55%"}
-![](images/logo-UNIPD.bmp){fig-align="center" width="700"}
+![](images/logo-UNIPD.bmp){fig-align="center" width="450"}
 :::
 :::::
 
