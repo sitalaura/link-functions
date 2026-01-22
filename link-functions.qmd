@@ -393,7 +393,7 @@ sappiamo perché il modello lineare non funziona (da prima). ma perché non anch
 
 Using **2 alternatives forced-choice probit link**, 
 
-we account for the 50\% chance level in a TRUE/FALSE task.
+we account for the 50\% chance level in a TRUE/FALSE task
 
 ```{r fitMint-plot}
 #| echo: false
