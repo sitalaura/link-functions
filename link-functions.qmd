@@ -39,9 +39,8 @@ tc <- "black"
 
 ## Simulated dataset 1
 
-independent variable: age in years (`years`)
-
-dependent variable: (`variabile`)
+- Independent variable: age (in years)
+- Dependent variable: IQ score
 
 ```{r sim1}
 #| echo: false
@@ -51,21 +50,22 @@ N <- 200
 age <- runif(N, 6, 10)
 r <- 0.7
 age_z <- scale(age)
-y <- r * age_z + sqrt(1 - r^2) * rnorm(N)
-d <- data.frame(age, y)
+iq_score <- r * age_z + sqrt(1 - r^2) * rnorm(N)
+d <- data.frame(age, iq_score)
 
-ggplot(d,aes(x=age,y=y))+
-  geom_point()
+ggplot(d,aes(x=age,y=iq_score))+
+  geom_point()+
+  ylab("IQ score")
 ```
 
 ## Linear model
 
-using the classical linear predictor
+Using the classical linear predictor
 
 ```{r ex1fitL}
 #| echo: true
 #| eval: false
-fit = lm(y~age, data=d)
+fit = lm(iq_score~age, data=d)
 ```
 
 ::: fragment
@@ -73,46 +73,45 @@ fit = lm(y~age, data=d)
 #| echo: false
 eff <- data.frame(age = seq(min(age), max(age), length.out = 100))
 
-fit <- lm(y ~ age, data = d)
+fit <- lm(iq_score ~ age, data = d)
 eff$y <- predict(fit, newdata = eff)
 
-ggplot(d, aes(x = age, y = y)) +
+ggplot(d, aes(x = age, y = iq_score)) +
   geom_point() +
   geom_line(data = eff, aes(x = age, y = y),
-            color = "red", linewidth = 2)
+            color = "red", linewidth = 2) +
+  ylab("IQ score")
 ```
 :::
 
 ## Linear model
 
-what we dont see it bc its a default parameter but its actually hidden in our code:
+What we don't see:
 
 ```{r fitL-link}
 #| echo: true
 #| eval: false
 #| code-fold: true
-fit = glm(y~age, family=gaussian(link="identity"), data=d)
+fit = glm(iq_score~age, family=gaussian(link="identity"), data=d)
 ```
 
 ::: fragment
-the model uses family gaussian and the identity link function
+The model uses a Gaussian family with an identity link
 :::
 
 ::: fragment
-**link function** in GLMs transforms (re-map) the linear predictor^[often called $\eta$ - in our example: $\eta = \beta_0 + \beta_1 \cdot age$]
-
-to the appropriate range of the response variable Y
+The **link function** maps the linear predictor
+$\eta = \beta_0 + \beta_1 \cdot \text{age}$
+onto the scale of the response variable $Y$
 :::
-
 
 
 # 2 Example
 
 ## Simulated dataset 2
 
-independent variable: age in years (`years`)
-
-dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
+- Independent variable: age (in years)
+- Dependent variable: mistakes in a TRUE/FALSE task (accuracy)
 
 ```{r sim2}
 #| echo: false
@@ -145,7 +144,7 @@ ggplot(d,aes(x=age,y=accuracy))+
 
 ## Linear model
 
-using the classical linear predictor
+Using the classical linear predictor
 
 ```{r fitL}
 #| echo: true
@@ -159,7 +158,7 @@ questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo que
 
 ## Linear model
 
-i nuovi dati simulati dal modello vanno chiaramente fuori dal range [0,1] di possibili valori per l'accuratezza
+**Predicted values** (IN VIOLA) can fall outside the valid range for accuracy [0,1]
 
 ```{r fitP-plot2}
 #| echo: false
@@ -175,14 +174,14 @@ ggplot(d,aes(x=age,y=accuracy))+
 
 ## ❌ Inappropriate model
 
-IN THE FIRST EXAMPLE an identity link was appropriate bc
+In the first example, the identity link was appropriate  
 
--   y (`boh`) spans from -inf to +inf
+- **IQ SCORE** (IN BLU) spans from $-\infty$ to $+\infty$
 
 ::: fragment
-here an identity link is NOT appropriate bc
+Here, the identity link is **not** appropriate  
 
--   y (`accuracy`) spans from 0 to 1
+- **accuracy** is bounded between 0 and 1
 :::
 
 ::: notes
@@ -212,6 +211,8 @@ vediamo graficamente che il modello ci permette di predire nuovi outcome compres
 
 ## ✅ More appropriate model
 
+**Predicted values** (IN VIOLA) fall within the valid range for accuracy [0,1]
+
 ```{r sup3}
 #| echo: false
 
@@ -234,22 +235,20 @@ ggplot(d,aes(x=age,y=accuracy))+
 fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
 ```
 
-in this case, `link="logit"` makes sure that `y` spans from 0 and 1
+`link="logit"` makes sure that `y` spans from 0 and 1
 
 # 3 Studying interactions
 
 ## Simulated dataset 2
 
-independent variable: age in years (`years`)
-
-dependent variable: mistakes in a TRUE/FALSE task (`accuracy`)
+- Independent variable: **age (in years)**
+- Dependent variable: **accuracy** in a TRUE/FALSE task
 
 ::: fragment
-**adding a new main effect: groups**
+**Adding a new main effect: group (IN BLU)**
 
-normal kids (`group = 0`)
-
-kids with dyslexia (`group = 1`)
+- Typically developing children (`group = 0`)
+- Children with dyslexia (`group = 1`)
 :::
 
 ## Simulated dataset 2
@@ -279,7 +278,7 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1))
 ```
 
-## Identity link function
+## `link="identity"`
 
 ```{r fitLint-plot}
 #| echo: false
@@ -300,9 +299,9 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 
 ```
 
-## Identity link function
+## `link="identity"`
 
-a **positive** interaction emerges
+A **positive** interaction emerges
 
 ```{r fitLint}
 #| echo: true
@@ -312,7 +311,7 @@ fit = glm(accuracy ~ age*group, data=d)
 summary(fit)
 ```
 
-## Logit link function
+## `link="logit"`
 
 ```{r fitLogitint-plot}
 #| echo: false
@@ -337,9 +336,9 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   )
 ```
 
-## Logit link function
+## `link="logit"`
 
-a **negative** interaction emerges
+A **negative** interaction emerges
 
 ```{r fitLogitint}
 #| echo: true
@@ -354,7 +353,7 @@ summary(fit)
 domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulato? o nessuno dei due? riformula la domanda: in termini dell'esempio tipo all'aumentare dell'età,... e perché?
 :::
 
-## cosa ho effettivamente simulato
+## What was actually simulated
 
 ```{r datasim}
 #| echo: true
@@ -381,16 +380,20 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 ```
 
 ::: fragment
-non ho simulato un'interazione, quindi ENTRAMBI i modelli trovano un'interazione che non c'è.
+No interaction was simulated
+
+Both models are detecting an interaction that does not exist
 :::
 
 ::: notes
 sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica? risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0% pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. il link in questione si chiama e ve lo mostro nel modello
 :::
 
-## il vero modello in grado di fittare i dati
+## ✅ The actual appropriate model
 
-let's try out the **multiple alternative forced choice** (50% - bc of the true/false) probit link
+Using **2 alternatives forced-choice probit link**, 
+
+we account for the 50\% chance level in a TRUE/FALSE task.
 
 ```{r fitMint-plot}
 #| echo: false
@@ -414,9 +417,9 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   )
 ```
 
-## il vero modello in grado di fittare i dati: link="mafc.probit"
+## ✅ The actual appropriate model: `link="mafc.probit(2)"`
 
-no interaction emerges !!!! as it should
+No interaction emerges, in line with how the data were generated
 
 ```{r fitMint}
 #| echo: true
@@ -430,9 +433,7 @@ summary(fit)
 
 ## `link="identity"`
 
-equal intervals on X correspond to equal intervals on Y
-
-su y metti i nomi delle variabili dell'esempio
+Equal intervals on X correspond to equal intervals on Y
 
 ```{r idlink}
 #| echo: false
@@ -473,8 +474,8 @@ ggplot(df_line, aes(x = x, y = y)) +
   ) +
 
   labs(
-    x = "Linear component of the model",
-    y = "Dependent variable"
+    x = "Linear predictor",
+    y = "IQ score"
   ) +
   theme_minimal(base_size = 18) +
   theme(
@@ -485,9 +486,11 @@ ggplot(df_line, aes(x = x, y = y)) +
   )
 ```
 
+In our example: $\eta = \beta_0 + \beta_1 \cdot age$
+
 ## `link="logit"`
 
-equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
+Equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
 
 ```{r loglink}
 #| echo: false
@@ -532,7 +535,7 @@ ggplot(df_line, aes(x = x, y = y)) +
   ) +
   
   labs(
-    x = "Linear component of the model",
+    x = "Linear predictor",
     y = "Accuracy"
   ) +
   
@@ -546,7 +549,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 ## `link=mafc.probit(2)`
 
-equal intervals on X do NOT correspond to equal intervals on Y
+Equal intervals on X do NOT correspond to equal intervals on Y
 
 ```{r macflink}
 #| echo: false
@@ -581,7 +584,7 @@ ggplot(df_line, aes(x = x, y = y)) +
     breaks = y_breaks,
     labels = y_breaks
   ) +
-  labs(x = "Linear component of the model", y = "Accuracy") +
+  labs(x = "Linear predictor", y = "Accuracy") +
   theme_minimal(base_size = 18) +
   theme(axis.title = element_text(size = 18), axis.text = element_text(size = 14))
 
@@ -590,27 +593,35 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 # Conclusions
 
-## 
+##
 
-Building a model means that we want to find the processo generativo dei dati which, diversamente dal mondo delle simulazioni, we could never know for sure
+Building a model means approximating the data-generating process (never observed directly in real data)
 
-to do that we must make important decisions
+That requires key choices:
 
-choosing the more appropriate **family of distributions** to make sure that the new values of the vd im predicting lie within the bounds
+::: {.callout-tip}
+**Choose an appropriate distribution (family)**
+<br> so predicted values remain within the outcome’s valid range
+:::
 
-choosing the more appropriate **link function**: otherwise it's very likely you end up finding non linear effects (ie interactions) that are not there!
+::: {.callout-tip}
+**Choose an appropriate link function**  
+because the link defines the scale of effects and the wrong link can create spurious interactions
+:::
 
-## 
+## Our work
 
-We're conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) concerning how often the wrong link functions are used in psychological research + they lead to finding a significant interaction
+We are conducting a [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) to assess how often inappropriate link functions are used when testing interactions in psychological research
 
-so far, quite often
+::: fragment
+So far, this appears to happen quite often
+:::
 
 ## Materials & Contact
 
-Data simulation, code and presentation are available on GitHub at <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
+Data simulation, code and presentation are available on GitHub: <a href="https://github.com/sitalaura/link-functions.git" target="_blank">sitalaura/link-functions</a>
 
-Questions and feedbacks <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
+Questions and feedbacks: <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
 
 \vspace{1cm}
 
@@ -661,7 +672,7 @@ accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
 ```
 
-## Posterior predictive check link="probit"
+## New predicted values with `link="probit"`
 
 ```{r sup1}
 #| echo: true
@@ -683,9 +694,9 @@ ggplot(d,aes(x=age,y=accuracy))+
   ylab("accuracy")
 ```
 
-## Interaction with link="probit"
+## `link="probit"`
 
-a **negative** interaction emerges
+A **negative** interaction emerges
 
 ```{r sim2intsup}
 #| echo: false
