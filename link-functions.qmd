@@ -48,13 +48,20 @@ set.seed(2)
 
 N <- 200
 age <- runif(N, 6, 10)
+
 r <- 0.7
-age_z <- scale(age)
-iq_score <- r * age_z + sqrt(1 - r^2) * rnorm(N)
+age_z <- as.numeric(scale(age))
+
+iq <- r * age_z + sqrt(1 - r^2) * rnorm(N)
+
+iq_score <- 100 + 15 * iq
+iq_score[iq_score < 75]  <- 75
+iq_score[iq_score > 140] <- 140
+
 d <- data.frame(age, iq_score)
 
-ggplot(d,aes(x=age,y=iq_score))+
-  geom_point()+
+ggplot(d, aes(x = age, y = iq_score)) +
+  geom_point() +
   ylab("IQ score")
 ```
 
@@ -475,7 +482,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
   labs(
     x = "Linear predictor",
-    y = "IQ score"
+    y = "Continuous outcome"
   ) +
   theme_minimal(base_size = 18) +
   theme(
