@@ -39,8 +39,8 @@ tc <- "black"
 
 ## Simulated dataset 1
 
-- Independent variable: age (in years)
-- Dependent variable: IQ score
+- Independent variable: **<span style="color:#800000;">age</span>** (in years)
+- Dependent variable: **<span style="color:#800000;">IQ score</span>**
 
 ```{r sim1}
 #| echo: false
@@ -110,8 +110,8 @@ onto the scale of the response variable $Y$
 
 ## Simulated dataset 2
 
-- Independent variable: age (in years)
-- Dependent variable: mistakes in a TRUE/FALSE task (accuracy)
+- Independent variable: **<span style="color:#800000;">age</span>** (in years)
+- Dependent variable: **<span style="color:#800000;">accuracy</span>** in a TRUE/FALSE task
 
 ```{r sim2}
 #| echo: false
@@ -158,7 +158,7 @@ questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo que
 
 ## Linear model
 
-**Predicted values** (IN VIOLA) can fall outside the valid range for accuracy [0,1]
+<span style="color:#800080;">New predicted values</span> fall outside the valid range for accuracy [0,1]
 
 ```{r fitP-plot2}
 #| echo: false
@@ -176,12 +176,12 @@ ggplot(d,aes(x=age,y=accuracy))+
 
 In the first example, the identity link was appropriate  
 
-- **IQ SCORE** (IN BLU) spans from $-\infty$ to $+\infty$
+- <span style="color:#800000;">IQ score</span> spans from $-\infty$ to $+\infty$
 
 ::: fragment
 Here, the identity link is **not** appropriate  
 
-- **accuracy** is bounded between 0 and 1
+- <span style="color:#800000;">accuracy</span> is bounded between 0 and 1
 :::
 
 ::: notes
@@ -211,7 +211,7 @@ vediamo graficamente che il modello ci permette di predire nuovi outcome compres
 
 ## ✅ More appropriate model
 
-**Predicted values** (IN VIOLA) fall within the valid range for accuracy [0,1]
+<span style="color:#800080;">New predicted values</span> fall within the valid range for accuracy [0,1]
 
 ```{r sup3}
 #| echo: false
@@ -241,11 +241,11 @@ fit = glm(accuracy ~ age, data=d, family=binomial(link="logit"), weights= rep(k,
 
 ## Simulated dataset 2
 
-- Independent variable: **age (in years)**
-- Dependent variable: **accuracy** in a TRUE/FALSE task
+- Independent variable: **<span style="color:#800000;">age</span>** (in years)
+- Dependent variable: **<span style="color:#800000;">accuracy</span>** in a TRUE/FALSE task
 
 ::: fragment
-**Adding a new main effect: group (IN BLU)**
+**Adding a new main effect: <span style="color:#800000;">group</span>**
 
 - Typically developing children (`group = 0`)
 - Children with dyslexia (`group = 1`)
@@ -382,7 +382,7 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 ::: fragment
 No interaction was simulated
 
-Both models are detecting an interaction that does not exist
+<span style="color:#800000;"> Both models are detecting **an interaction that does not exist** </span>
 :::
 
 ::: notes
@@ -600,13 +600,14 @@ Building a model means approximating the data-generating process (never observed
 That requires key choices:
 
 ::: {.callout-tip}
-**Choose an appropriate distribution (family)**
-<br> so predicted values remain within the outcome’s valid range
+**Choose an appropriate distribution (family):**
+<br> predicted values remain within the outcome’s valid range
 :::
 
 ::: {.callout-tip}
-**Choose an appropriate link function**  
-because the link defines the scale of effects and the wrong link can create spurious interactions
+**Choose an appropriate link function: **  
+the link defines the scale of effects
+<br> the wrong link can create spurious interactions
 :::
 
 ## Our work
