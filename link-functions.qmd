@@ -2,8 +2,12 @@
 title: "Are we getting interactions wrong? <br> The role of link functions <br> in psychological research"
 authors: "Laura Sità, Margherita Calderan, Tommaso Feraco, <br> Filippo Gambarota, Enrico Toffalini"
 subtitle: |
-  <br>
-  <div style="display:flex; justify-content:center; align-items:center;">
+  <div style="
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin: 1.4em 0 1.2em 0;
+  ">
     <img src="images/logo.png" style="height:155px; margin-right:3cm;">
     <img src="images/logo-UNIPD.bmp" style="height:150px;">
   </div>
@@ -37,7 +41,7 @@ tc <- "black"
 
 ## Simulated dataset
 
-- 1,000 participants
+- 1,000 subjects
   - 500 typically developing children (`group = 0`)
   - 500 children with dyslexia (`group = 1`)
 - 50 trials per participant
@@ -71,9 +75,30 @@ d = data.frame(
   group = as.factor(group)
 )
 
+pal <- c("0" = "#3b86d1", "1" = "#e9b26a")
+
+theme_pres <- theme_minimal(base_size = 22) +
+  theme(
+    axis.title.x = element_text(size = 26, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 26, margin = margin(r = 16)),
+    axis.text    = element_text(size = 22),
+    legend.title = element_text(size = 24),
+    legend.text  = element_text(size = 22),
+    plot.title   = element_text(size = 28),
+    strip.text   = element_text(size = 22),
+    panel.background = element_rect(fill = "grey92", color = NA),
+    plot.background  = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "white", linewidth = 0.6),
+    panel.grid.minor = element_line(color = "white", linewidth = 0.3)
+  )
+
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point() +
-  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1))
+  geom_point(size = 1.3, alpha = 0.6) +
+  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1)) +
+  scale_color_manual(values = pal) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 ## Building the model
 
@@ -110,9 +135,12 @@ eff <- data.frame(
 )
 
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(alpha = .6) +
-  geom_line(data = eff, aes(x = age, y = fit, group = group), size = 2)
-
+  geom_point(size = 1.3, alpha = 0.6) +
+  geom_line(data = eff, aes(x = age, y = fit, group = group), size = 2)+
+  scale_color_manual(values = pal) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ::: notes
@@ -131,15 +159,17 @@ però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla 
 d$pp_sim <- simulate(fitLint)$sim_1
 
 ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(y = pp_sim), color = "purple", size = 3.5, alpha = .4) +
-  geom_point(alpha = .6) +
+  geom_point(aes(y = pp_sim), color = "purple", size = 2.5, alpha = .4) +
+  geom_point(size = 1.3, alpha = 0.6) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
     color = "red",
     linewidth = 2
   ) +
-  ylab("accuracy")
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 
 ```
 
@@ -184,12 +214,14 @@ eff <- data.frame(
 )
 
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(alpha = .6) +
+  geom_point(size = 1.3, alpha = 0.6) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
-    size = 2
-  )
+    size = 2) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ::: notes
@@ -207,16 +239,17 @@ p_hat <- fitted(fitLogit)
 d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
 
 ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(y = pp_sim), color = "purple", size = 3.5, alpha = .4) +
-  geom_point(alpha = .6) +
+  geom_point(aes(y = pp_sim), color = "purple", size = 2.5, alpha = .4) +
+  geom_point(size = 1.3, alpha = 0.6) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
     color = "red",
     linewidth = 2
   ) +
-  ylab("accuracy")
-
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ::: notes
@@ -266,8 +299,11 @@ d = data.frame(
 )
 
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point() +
-  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1))
+  geom_point(size = 1.3, alpha = 0.6) +
+  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1)) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ::: fragment
@@ -301,12 +337,14 @@ eff <- data.frame(
 )
 
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(alpha = .6) +
+  geom_point(size = 1.3, alpha = 0.6) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
-    size = 2
-  )
+    size = 2) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ## `family=binomial(link=mafc.probit(.m=2)`
@@ -373,7 +411,8 @@ ggplot(df_line, aes(x = x, y = y)) +
   theme(
     plot.title = element_text(face = "bold", color = "steelblue", size = 26),
     plot.subtitle = element_text(size = 18),
-    axis.title = element_text(size = 18),
+    axis.title.x = element_text(size = 22, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 22, margin = margin(r = 16)),
     axis.text = element_text(size = 14)
   )
 ```
@@ -433,8 +472,11 @@ ggplot(df_line, aes(x = x, y = y)) +
   
   theme_minimal(base_size = 18) +
   theme(
-    axis.title = element_text(size = 18),
-    axis.text = element_text(size = 14)
+    plot.title = element_text(face = "bold", color = "steelblue", size = 26),
+    plot.subtitle = element_text(size = 18),
+    axis.title.x = element_text(size = 22, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 22, margin = margin(r = 16)),
+    axis.text = element_text(size = 15)
   )
 
 ```
@@ -478,8 +520,13 @@ ggplot(df_line, aes(x = x, y = y)) +
   ) +
   labs(x = "Linear predictor", y = "Accuracy") +
   theme_minimal(base_size = 18) +
-  theme(axis.title = element_text(size = 18), axis.text = element_text(size = 14))
-
+  theme(
+    plot.title = element_text(face = "bold", color = "steelblue", size = 26),
+    plot.subtitle = element_text(size = 18),
+    axis.title.x = element_text(size = 22, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 22, margin = margin(r = 16)),
+    axis.text = element_text(size = 15)
+  )
 
 ```
 
@@ -515,15 +562,15 @@ Data simulation, code and presentation are available on GitHub: <a href="https:/
 
 Questions and feedbacks: <a href="mailto: laura.sita@studenti.unipd.it" target="_blank">laura.sita\@studenti.unipd.it</a>
 
-\vspace{1cm}
+<div style="margin-top:3em;"></div>
 
 ::::: columns
 ::: {.column width="45%"}
-![](images/logo.png){fig-align="center" width="180"}
+![](images/logo.png){fig-align="center" width="160"}
 :::
 
 ::: {.column width="55%"}
-![](images/logo-UNIPD.bmp){fig-align="center" width="450"}
+![](images/logo-UNIPD.bmp){fig-align="left" width="400"}
 :::
 :::::
 
@@ -544,10 +591,6 @@ Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric mod
 <p style="font-size:70%; text-align:left; line-height:1.2; padding-left:1.5em; text-indent:-1.5em;">
 Micceri, T. (1989). The unicorn, the normal curve, and other improbable creatures. *Psychological bulletin, 105*(1), 156.
 </p>
-
-## Thank you
-
-Special thanks to
 
 # Supplementary materials
 
@@ -576,14 +619,16 @@ d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
 
 ggplot(d, aes(x = age, y = accuracy)) +
   geom_point(aes(y = pp_sim), color = "purple", size = 3.5, alpha = .4) +
-  geom_point(alpha = .6) +
+  geom_point(size = 1.3, alpha = 0.6) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
     color = "red",
     linewidth = 2
   ) +
-  ylab("accuracy")
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
 ```
 
 ## `family=binomial(link="probit")`
