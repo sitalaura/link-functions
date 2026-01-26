@@ -37,10 +37,10 @@ tc <- "black"
 
 ## Simulated dataset
 
-50 trial x soggetto, abbiamo 1000 soggetti, di cui
-
-- 500 typically developing children (`group = 0`)
-- 500 children with dyslexia (`group = 1`)
+- 1,000 participants
+  - 500 typically developing children (`group = 0`)
+  - 500 children with dyslexia (`group = 1`)
+- 50 trials per participant
 
 ::: fragment
 - Independent variable 1: **<span style="color:#800000;">age</span>** (in years)
@@ -52,6 +52,7 @@ tc <- "black"
 
 ```{r datasim1}
 #| echo: false
+#| fig.align: center
 
 set.seed(0)
 
@@ -78,12 +79,12 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
 
 Key choices:
 
-- **family**  
-  specifies the response distribution and its valid range 
-  (e.g., unbounded, $[0,1]$, counts)
+- **<span style="color:#800000;">family</span>**
+  <br> specifies the response distribution and its valid range 
+  <br> (e.g., unbounded, $[0,1]$, counts)
 
-- **link function**  
-  maps the linear predictor  $\beta_0 + \beta_1 \cdot age + \beta_2 \cdot group$  
+- **<span style="color:#800000;">link function</span>**
+  <br> maps the linear predictor  $\beta_0 + \beta_1 \cdot age + \beta_2 \cdot group$  
   onto the scale of the response variable $Y$
 
 ::: notes
@@ -97,6 +98,7 @@ specifica che la scelta della link dipendende dalla family
 ```{r fitL-plot}
 #| echo: false
 #| warning: false
+#| fig.align: center
 
 fitLint <- glm(accuracy ~ age * group, family=gaussian(link="identity"), data = d)
 
@@ -118,12 +120,13 @@ c'è un'interazione
 però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
 :::
 
-## posterior predictive check
+## Predictive check
 
 <span style="color:#800080;">New predicted values</span> fall outside the valid range for accuracy [0,1]
 
 ```{r fitL-plot-pred}
 #| echo: false
+#| fig.align: center
 
 d$pp_sim <- simulate(fitLint)$sim_1
 
@@ -168,6 +171,7 @@ CHIEDI: quindi che modello possiamo fare?
 ```{r fitLogit-plot}
 #| echo: false
 #| warning: false
+#| fig.align: center
 
 fitLogit = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"),
           weights= rep(k, nrow(d)))
@@ -193,10 +197,11 @@ c'è un'interazione
 questo modello non sembra avere problemi
 :::
 
-## posterior predictive check
+## Predictive check
 
 ```{r fitLogit-pred}
 #| echo: false
+#| fig.align: center
 
 p_hat <- fitted(fitLogit)                      
 d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
@@ -243,6 +248,7 @@ domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulat
 ```{r datasim2}
 #| echo: true
 #| code-fold: true
+#| fig.align: center
 
 k = 50
 N = 1000
@@ -276,13 +282,14 @@ sappiamo perché il modello lineare non funziona (da prima). ma perché non anch
 
 ## `family=binomial(link=mafc.probit(.m=2)`
 
-Using **2 alternatives forced-choice probit link**, 
+To account for the 50\% chance level in a TRUE/FALSE task:
 
-we account for the 50\% chance level in a TRUE/FALSE task
+**<span style="color:#800000;">2 alternatives forced-choice probit link</span>**
 
 ```{r fitMint-plot}
 #| echo: false
 #| warning: false
+#| fig.align: center
 
 fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
 
@@ -494,7 +501,7 @@ Key choices:
 the wrong link can create spurious interactions
 :::
 
-## A [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) of psychological research
+## Our [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) of psychological research
 
 How often 
 
@@ -544,11 +551,13 @@ Special thanks to
 
 # Supplementary materials
 
-## New predicted values with `link="probit"`
+## Predictive check with `link="probit"`
 
 ```{r sup1}
 #| echo: false
 #| warning: false
+#| fig.align: center
+
 fitProbit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
           weights= rep(k, nrow(d)))
 
@@ -582,6 +591,10 @@ ggplot(d, aes(x = age, y = accuracy)) +
 A **negative** interaction emerges
 
 ```{r sup3}
+#| echo: true
+#| include: true
+#| warning: true
+
 fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"), weights= rep(k, nrow(d)))
 summary(fit)
 ```
