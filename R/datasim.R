@@ -15,7 +15,7 @@ probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
 
-# linear model
+# linear model 
 
 fit = lm(accuracy ~ age, data=d)
 eff = data.frame(allEffects(fit,xlevels=list(age=seq(6,10,.1)))$"age")
