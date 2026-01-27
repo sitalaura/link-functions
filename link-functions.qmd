@@ -77,12 +77,12 @@ d = data.frame(
 )
 
 pal_points <- c("0" = "#7F97E8", "1" = "#ed8f58")
-pal_lines  <- c("0" = "#4E6BDC", "1" = "#d96b2b")
+pal_lines  <- c("0" = "#4E6BDC", "1" = "#ff911c")
 
 pal_predcheck <- c(
   observed  = "#222222",
   predicted = "#a68efa",
-  model     = "#f75781"
+  model     = "#cf3e65"
 )
 
 theme_pres <- theme_minimal(base_size = 22) +
@@ -164,7 +164,7 @@ però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla 
 
 ## Predictive check
 
-<span style="color:#800080;">New predicted values</span> fall outside the valid range for accuracy [0,1]
+<span style="color:#a68efa;">New predicted values</span> fall outside the valid range for accuracy [0,1]
 
 ```{r fitL-plot-pred}
 #| echo: false
@@ -258,7 +258,7 @@ questo modello non sembra avere problemi
 
 ## Predictive check
 
-<span style="color:#800080;">New predicted values</span> fall within the valid range for accuracy [0,1]
+<span style="color:#a68efa;">New predicted values</span> fall within the valid range for accuracy [0,1]
 
 ```{r fitLogit-pred}
 #| echo: false
