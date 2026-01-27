@@ -79,6 +79,12 @@ d = data.frame(
 pal_points <- c("0" = "#7F97E8", "1" = "#ed8f58")
 pal_lines  <- c("0" = "#4E6BDC", "1" = "#d96b2b")
 
+pal_predcheck <- c(
+  observed  = "#222222",
+  predicted = "#a68efa",
+  model     = "#f75781"
+)
+
 theme_pres <- theme_minimal(base_size = 22) +
   theme(
     axis.title.x = element_text(size = 26, margin = margin(t = 10)),
@@ -167,15 +173,23 @@ però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla 
 d$pp_sim <- simulate(fitLint)$sim_1
 
 ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(y = pp_sim), color = "purple", size = 2.5, alpha = .4) +
-  geom_point(size = 1.3, alpha = 0.6) +
+  geom_point(
+    aes(y = pp_sim),
+    color = pal_predcheck["predicted"],
+    size = 2.5,
+    alpha = 0.4
+  ) +
+  geom_point(
+    color = pal_predcheck["observed"],
+    size = 1.3,
+    alpha = 0.6
+  ) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
-    color = "red",
+    color = pal_predcheck["model"],
     linewidth = 2
   ) +
-  scale_color_manual(values = pal_points) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -244,6 +258,8 @@ questo modello non sembra avere problemi
 
 ## Predictive check
 
+<span style="color:#800080;">New predicted values</span> fall within the valid range for accuracy [0,1]
+
 ```{r fitLogit-pred}
 #| echo: false
 #| fig.align: center
@@ -252,18 +268,27 @@ p_hat <- fitted(fitLogit)
 d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
 
 ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(y = pp_sim), color = "purple", size = 2.5, alpha = .4) +
-  geom_point(size = 1.3, alpha = 0.6) +
+  geom_point(
+    aes(y = pp_sim),
+    color = pal_predcheck["predicted"],
+    size = 2.5,
+    alpha = 0.4
+  ) +
+  geom_point(
+    color = pal_predcheck["observed"],
+    size = 1.3,
+    alpha = 0.6
+  ) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
-    color = "red",
+    color = pal_predcheck["model"],
     linewidth = 2
   ) +
-  scale_color_manual(values = pal_points) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
+
 ```
 
 ::: notes
@@ -641,12 +666,21 @@ p_hat <- fitted(fitProbit)
 d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
 
 ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(y = pp_sim), color = "purple", size = 3.5, alpha = .4) +
-  geom_point(size = 1.3, alpha = 0.6) +
+  geom_point(
+    aes(y = pp_sim),
+    color = pal_predcheck["predicted"],
+    size = 3.5,
+    alpha = 0.4
+  ) +
+  geom_point(
+    color = pal_predcheck["observed"],
+    size = 1.3,
+    alpha = 0.6
+  ) +
   geom_line(
     data = eff,
     aes(x = age, y = fit, group = group),
-    color = "red",
+    color = pal_predcheck["model"],
     linewidth = 2
   ) +
   xlab("Age") +
