@@ -34,6 +34,7 @@ execute:
 library(ggplot2)
 library(effects)
 library(psyphy)
+library(ggnewscale)
 
 ts <- 16
 tc <- "black"
@@ -75,7 +76,8 @@ d = data.frame(
   group = as.factor(group)
 )
 
-pal <- c("0" = "#3b86d1", "1" = "#e9b26a")
+pal_points <- c("0" = "#7F97E8", "1" = "#ed8f58")
+pal_lines  <- c("0" = "#4E6BDC", "1" = "#d96b2b")
 
 theme_pres <- theme_minimal(base_size = 22) +
   theme(
@@ -95,7 +97,7 @@ theme_pres <- theme_minimal(base_size = 22) +
 ggplot(d, aes(x = age, y = accuracy, color = group)) +
   geom_point(size = 1.3, alpha = 0.6) +
   scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1)) +
-  scale_color_manual(values = pal) +
+  scale_color_manual(values = pal_points) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -134,13 +136,19 @@ eff <- data.frame(
   )[["age:group"]]
 )
 
-ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(size = 1.3, alpha = 0.6) +
-  geom_line(data = eff, aes(x = age, y = fit, group = group), size = 2)+
-  scale_color_manual(values = pal) +
+ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2) +
+  scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
+
 ```
 
 ::: notes
@@ -167,6 +175,7 @@ ggplot(d, aes(x = age, y = accuracy)) +
     color = "red",
     linewidth = 2
   ) +
+  scale_color_manual(values = pal_points) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -213,15 +222,19 @@ eff <- data.frame(
   )[["age:group"]]
 )
 
-ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(size = 1.3, alpha = 0.6) +
+ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
   geom_line(
     data = eff,
-    aes(x = age, y = fit, group = group),
-    size = 2) +
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2) +
+  scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
+
 ```
 
 ::: notes
@@ -247,6 +260,7 @@ ggplot(d, aes(x = age, y = accuracy)) +
     color = "red",
     linewidth = 2
   ) +
+  scale_color_manual(values = pal_points) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -298,9 +312,15 @@ d = data.frame(
   group = as.factor(group)
 )
 
-ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(size = 1.3, alpha = 0.6) +
-  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1)) +
+ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2) +
+  scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -336,12 +356,15 @@ eff <- data.frame(
   )[["age:group"]]
 )
 
-ggplot(d, aes(x = age, y = accuracy, color = group)) +
-  geom_point(size = 1.3, alpha = 0.6) +
+ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
   geom_line(
     data = eff,
-    aes(x = age, y = fit, group = group),
-    size = 2) +
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2) +
+  scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -391,7 +414,7 @@ ggplot(df_line, aes(x = x, y = y)) +
     linewidth = 0.6
   ) +
   geom_line(
-    color = "blue",
+    color = "#4E6BDC",
     linewidth = 2
   ) +
   scale_x_continuous(
@@ -450,7 +473,7 @@ ggplot(df_line, aes(x = x, y = y)) +
     linewidth = 0.6
   ) +
   geom_line(
-    color = "blue",
+    color = "#4E6BDC",
     linewidth = 2
   ) +
   
@@ -510,7 +533,7 @@ y_breaks <- c(y_breaks, 0.99)
 ggplot(df_line, aes(x = x, y = y)) +
   geom_hline(yintercept = y_vals, color = "grey60", linewidth = 0.6) +
   geom_vline(xintercept = x_vals, color = "red", linetype = "dashed", linewidth = 0.6) +
-  geom_line(color = "blue", linewidth = 2) +
+  geom_line(color = "#4E6BDC", linewidth = 2) +
   geom_hline(yintercept = 1/2, linewidth = 1) +
   scale_x_continuous(limits = c(-4.5, 4.5), breaks = x_vals) +
   scale_y_continuous(
