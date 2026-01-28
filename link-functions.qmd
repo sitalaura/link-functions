@@ -159,7 +159,7 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ::: notes
 c'è un'interazione
-però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
+però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset These are one simulated dataset generated from the fitted model. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
 :::
 
 ## Predictive check
@@ -412,6 +412,10 @@ summary(fit)
 ```
 
 # Why interactions
+
+::: notes
+noi testiamo di solito effetti lineari (quasi mai non lineari), mentre le interazioni le vai a vedere quasi sempre (i software tipo spss li mostrano) ed è un tipo di non linearità che viene testato quasi non intenzionalmente. pertanto il ricercatore testa effetti non lineari (interazioni) col link sbagliato (risentendo del problema delle trasformazioni di differenze) 
+:::
 
 ## `link="identity"`
 
@@ -704,4 +708,5 @@ A **negative** interaction emerges
 fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"), weights= rep(k, nrow(d)))
 summary(fit)
 ```
+
 
