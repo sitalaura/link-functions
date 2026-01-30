@@ -605,14 +605,12 @@ Building a model means approximating the data-generating process (never observed
 
 Key choices:
 
-::: {.callout-tip}
-**Appropriate distribution (family):**
-<br> predicted values remain within the outcome’s valid range
+::: {.callout-tip title="Family"}
+Predicted values remain within the outcome’s valid range
 :::
 
-::: {.callout-tip}
-**Appropriate link function: **  
-the wrong link can create spurious interactions
+::: {.callout-tip title="Link function"}
+Wrong links can create spurious interactions
 :::
 
 ## Our [systematic review](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215) of psychological research
