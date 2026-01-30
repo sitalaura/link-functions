@@ -333,11 +333,13 @@ domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulat
 #| code-fold: true
 #| fig.align: center
 
+set.seed(0)
+
 k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
-eta = -6+1*age-1*group # linear predictor
+eta = -6+1*age-1*group  # linear predictor
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 
