@@ -65,7 +65,7 @@ k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
-eta = -6+1*age-1*group
+eta = -6+1*age-1*group # simulated linear predictor
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 

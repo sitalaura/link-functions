@@ -53,6 +53,10 @@ tc <- "black"
 - Dependent variable: **<span style="color:#800000;">accuracy</span>** in a TRUE/FALSE task
 :::
 
+::: fragment
+![](images/hand.jpg){.absolute bottom=90 right=0 width="360" height="220"}
+:::
+
 ## Simulated dataset
 
 ```{r datasim1}
@@ -65,7 +69,7 @@ k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
-eta = -6+1*age-1*group
+eta = -6+1*age-1*group  # linear predictor
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 
@@ -108,6 +112,13 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   ylab("Accuracy") +
   theme_pres
 ```
+
+::: notes
+ogni puntino = un bambino
+asse x: età 
+asse y: quante risposte corrette dà / 50 domande vero-falso
+:::
+
 ## Building the model
 
 Key choices:
@@ -326,30 +337,26 @@ k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
-eta = -6+1*age-1*group
+eta = -6+1*age-1*group # linear predictor
 probs = mafc.probit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 
-d = data.frame(
-  age = age,
-  age_c = age - mean(age),
-  accuracy = accuracy,
-  group = as.factor(group))
 ```
 
 ```{r datasim3}
 #| echo: false
 #| fig.align: center
 
-ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+d = data.frame(
+  age = age,
+  age_c = age - mean(age),
+  accuracy = accuracy,
+  group = as.factor(group))
+
+ggplot(d, aes(x = age, y = accuracy, color = group)) +
+  geom_point(size = 1.3, alpha = 0.6) +
+  scale_x_continuous(limits = c(6, 10), breaks = seq(6, 10, 1)) +
   scale_color_manual(values = pal_points) +
-  new_scale_color() +
-  geom_line(
-    data = eff,
-    aes(x = age, y = fit, color = group, group = group),
-    linewidth = 2) +
-  scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
   theme_pres
@@ -398,6 +405,10 @@ ggplot(d, aes(x = age, y = accuracy)) +
   ylab("Accuracy") +
   theme_pres
 ```
+
+::: fragment
+![](images/hand.jpg){.absolute bottom=60 right=0 width="360" height="220"}
+:::
 
 ## `family=binomial(link=mafc.probit(.m=2)`
 
@@ -539,7 +550,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 ## `link=mafc.probit(2)`
 
-Equal intervals on X do NOT correspond to equal intervals on Y
+Logit/probit on [*chance level*, 1] instead of [0,l]
 
 ```{r macflink}
 #| echo: false
