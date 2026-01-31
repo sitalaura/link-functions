@@ -11,7 +11,7 @@ k = 60
 N = 400
 age = runif(N,6,10)
 eta = -5.5+age*0.9
-probs = mafc.probit(.m = 2)$linkinv(eta)
+probs = mafc.logit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 d = data.frame(age,accuracy)
 
@@ -59,14 +59,14 @@ ggplot(d,aes(x=accuracy))+
 ###################################
 
 # simulation w/ 2 independent variables
-set.seed(0) 
+set.seed(123) 
 
 k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
 eta = -6+1*age-1*group # simulated linear predictor
-probs = mafc.probit(.m = 2)$linkinv(eta)
+probs = mafc.logit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 
 d = data.frame(
@@ -95,7 +95,7 @@ fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
 summary(fit)
 
 # multiple alternative forced choice (50%) probit
-fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)),
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)),
           weights= rep(k, nrow(d)))
 summary(fit)
 

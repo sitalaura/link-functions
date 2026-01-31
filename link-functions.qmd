@@ -26,21 +26,40 @@ execute:
   freeze: false
 ---
 
-```{r source}
+```{r setup}
 #| echo: false
 #| include: false
-#source("R/datasim.R")
 
 library(ggplot2)
+library(patchwork)
 library(effects)
 library(psyphy)
 library(ggnewscale)
+library(filor)
 
 ts <- 16
 tc <- "black"
+
+style_output <- function(x, lines, class = "hg"){
+  x <- capture.output(x)
+  x <- htmltools::htmlEscape(x)
+  x[lines] <- sprintf("<span class='%s'>%s</span>", class, x[lines])
+  cat("<pre><code>")
+  cat(x, sep = "\n")
+  cat("</code></pre>")
+}
+
 ```
 
-## Simulated dataset
+```{=html}
+<style>
+    .hg {
+        background-color: yellow;
+    }
+</style>
+```
+
+## Our dataset
 
 - 1,000 subjects
   - 500 typically developing children (`group = 0`)
@@ -57,20 +76,20 @@ tc <- "black"
 ![](images/hand.jpg){.absolute bottom=90 right=0 width="360" height="220"}
 :::
 
-## Simulated dataset
+## Our dataset
 
 ```{r datasim1}
 #| echo: false
 #| fig.align: center
 
-set.seed(0)
+set.seed(123) 
 
 k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
-eta = -6+1*age-1*group  # linear predictor
-probs = mafc.probit(.m = 2)$linkinv(eta)
+eta = -6+1*age-1*group # simulated linear predictor
+probs = mafc.logit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
 
 d = data.frame(
@@ -81,7 +100,7 @@ d = data.frame(
 )
 
 pal_points <- c("0" = "#7F97E8", "1" = "#ed8f58")
-pal_lines  <- c("0" = "#4E6BDC", "1" = "#ff911c")
+pal_lines  <- c("0" = "#4E6BDC", "1" = "#fa6b0c")
 
 pal_predcheck <- c(
   observed  = "#222222",
@@ -217,11 +236,26 @@ per curiosità, andiamo comunque a vedere il summary del modello
 A **positive** interaction emerges
 
 ```{r fitLsum}
+#| eval: false
 #| echo: true
-#| include: true
 #| warning: true
 fit = glm(accuracy ~ age*group, family=gaussian(link="identity"), data=d)
 summary(fit)
+```
+
+```{r fitLsum2}
+#| echo: false
+#| warning: true
+#| message: false
+#| output: asis
+
+fit <- glm(accuracy ~ age*group, family = gaussian(link="identity"), data = d)
+
+ss <- capture.output(summary(fit))
+ss <- ss[5:11]
+hl <- grep("age:group", ss)
+style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
+
 ```
 
 ::: notes
@@ -258,7 +292,61 @@ ggplot(d, aes(x = age, y = accuracy)) +
   scale_color_manual(values = pal_lines) +
   xlab("Age") +
   ylab("Accuracy") +
+  theme_pres 
+
+```
+
+## `family=binomial(link="logit")`
+
+```{r fitLogit-plot2}
+#| echo: false
+#| warning: false
+#| fig.align: center
+
+fitLogit <- glm(
+  accuracy ~ age * group,
+  data = d,
+  family = binomial(link = "logit"),
+  weights = rep(k, nrow(d))
+)
+
+eff <- data.frame(
+  allEffects(
+    fitLogit,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
+
+p_left <- ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2
+  ) +
+  scale_color_manual(values = pal_lines) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres +
+  theme(legend.position = "none")
+
+p_right <- ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = qlogis(fit), color = group, group = group),
+    linewidth = 2
+  ) +
+  scale_color_manual(values = pal_lines) +
+  xlab("Age") +
+  ylab("Logit(accuracy)") +
   theme_pres
+
+p_left | p_right
 
 ```
 
@@ -312,12 +400,25 @@ anche qui andiamo a vedere il summary del modello
 A **negative** interaction emerges
 
 ```{r fitLogitsum}
+#| eval: false
 #| echo: true
-#| include: true
-#| warning: false
+#| warning: true
 
 fit = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
 summary(fit)
+```
+
+```{r fitLogitsum2}
+#| echo: false
+#| warning: true
+#| output: asis
+
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link="logit"), weights= rep(k, nrow(d)))
+
+ss <- capture.output(summary(fit))
+ss <- ss[5:11]
+hl <- grep("age:group", ss)
+style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
 ```
 
 ::: notes
@@ -326,23 +427,22 @@ domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulat
 
 # The appropriate model
 
-## What was actually simulated
+## The dataset was actually simulated
 
 ```{r datasim2}
 #| echo: true
 #| code-fold: true
 #| fig.align: center
 
-set.seed(0)
+set.seed(123)
 
 k = 50
 N = 1000
 group = rbinom(N,1,.5)
 age = runif(N,6,10)
 eta = -6+1*age-1*group  # linear predictor
-probs = mafc.probit(.m = 2)$linkinv(eta)
+probs = mafc.logit(.m = 2)$linkinv(eta)
 accuracy = rbinom(n = N, size = k, prob = probs) / k
-
 ```
 
 ```{r datasim3}
@@ -374,18 +474,18 @@ No interaction was simulated
 sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica? risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0% pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. il link in questione si chiama e ve lo mostro nel modello
 :::
 
-## `family=binomial(link=mafc.probit(.m=2)`
+## `family=binomial(link=mafc.logit(.m=2))`
 
 To account for the 50\% chance level in a TRUE/FALSE task:
 
-**<span style="color:#800000;">2 alternatives forced-choice probit link</span>**
+**<span style="color:#800000;">2 alternatives forced-choice logit link</span>**
 
 ```{r fitMint-plot}
 #| echo: false
 #| warning: false
 #| fig.align: center
 
-fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)), weights= rep(k, nrow(d)))
 
 eff <- data.frame(
   allEffects(
@@ -412,17 +512,81 @@ ggplot(d, aes(x = age, y = accuracy)) +
 ![](images/hand.jpg){.absolute bottom=60 right=0 width="360" height="220"}
 :::
 
-## `family=binomial(link=mafc.probit(.m=2)`
+## `family=binomial(link=mafc.logit(.m=2))`
+
+```{r fitMint-plot2}
+#| echo: false
+#| fig.align: center
+
+fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)), weights= rep(k, nrow(d)))
+
+eff <- data.frame(
+  allEffects(
+    fitM,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
+
+p_left <- ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, color = group, group = group),
+    linewidth = 2) +
+  scale_color_manual(values = pal_lines) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres +
+  theme(legend.position = "none")
+
+
+p_right <- ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = qlogis(fit), color = group, group = group),
+    linewidth = 2
+  ) +
+  scale_color_manual(values = pal_lines) +
+  xlab("Age") +
+  ylab("Logit(accuracy)") +
+  theme_pres
+
+p_left | p_right
+
+```
+
+## `family=binomial(link=mafc.logit(.m=2))`
 
 No interaction emerges, in line with how the data were generated
 
 ```{r fitMint}
+#| eval: false
 #| echo: true
 #| warning: true
 
-fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.probit(.m=2)), weights= rep(k, nrow(d)))
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)), weights= rep(k, nrow(d)))
 summary(fit)
 ```
+
+```{r fitMint2}
+#| echo: false
+#| warning: true
+#| output: asis
+
+fit = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)), weights= rep(k, nrow(d)))
+
+ss <- capture.output(summary(fit))
+ss <- ss[5:11]
+hl <- grep("age:group", ss)
+style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
+
+```
+
 
 # Why interactions
 
@@ -490,7 +654,7 @@ In our example the linear predictor is $\beta_0 + \beta_1 \cdot age + \beta_2 \c
 
 ## `link="logit"`
 
-Equal intervals on X correspond to equal ratios (NOT equal intervals) on Y
+Equal intervals on X correspond to equal ratios on Y **when on the logit scale**
 
 ```{r loglink}
 #| echo: false
@@ -550,7 +714,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 ```
 
-## `link=mafc.probit(2)`
+## `link=mafc.logit(2)`
 
 Logit/probit on [*chance level*, 1] instead of [0,l]
 
@@ -559,35 +723,52 @@ Logit/probit on [*chance level*, 1] instead of [0,l]
 #| warning: false
 #| fig.align: "center" 
 
-mafc_probit_linkinv <- function(x, m) {
+mafc_logit_linkinv <- function(x, m) {
   g <- 1 / m
-  g + (1 - g) * pnorm(x)
+  g + (1 - g) * plogis(x)
 }
 
-df_line <- data.frame(x = seq(-4.5, 4.5, length.out = 400))
-df_line$y <- mafc_probit_linkinv(df_line$x, m = 2)
+df_line <- data.frame(
+  x = seq(-5, 5, length.out = 400)
+)
+df_line$y <- mafc_logit_linkinv(df_line$x, m = 2)
 
 x_vals <- -4:4
-y_vals <- mafc_probit_linkinv(x_vals, m = 2)
-
-y_breaks <- mafc_probit_linkinv(c(-4, -1, 0, 1, 2, 3, 4), m = 2)
-y_breaks <- round(y_breaks, 2)
-
-y_breaks <- y_breaks[y_breaks < 1]
-y_breaks <- c(y_breaks, 0.99)
+y_vals <- mafc_logit_linkinv(x_vals, m = 2)
 
 ggplot(df_line, aes(x = x, y = y)) +
-  geom_hline(yintercept = y_vals, color = "grey60", linewidth = 0.6) +
-  geom_vline(xintercept = x_vals, color = "red", linetype = "dashed", linewidth = 0.6) +
-  geom_line(color = "#4E6BDC", linewidth = 2) +
-  geom_hline(yintercept = 1/2, linewidth = 1) +
-  scale_x_continuous(limits = c(-4.5, 4.5), breaks = x_vals) +
-  scale_y_continuous(
-    limits = c(0.25, 1),
-    breaks = y_breaks,
-    labels = y_breaks
+  geom_hline(
+    yintercept = y_vals,
+    color = "grey60",
+    linewidth = 0.6
   ) +
-  labs(x = "Linear predictor", y = "Accuracy") +
+  geom_vline(
+    xintercept = x_vals,
+    color = "red",
+    linetype = "dashed",
+    linewidth = 0.6
+  ) +
+  geom_line(
+    color = "#4E6BDC",
+    linewidth = 2
+  ) +
+  geom_hline(
+    yintercept = 1 / 2,
+    linewidth = 1
+  ) +
+  scale_x_continuous(
+    limits = c(-4.5, 4.5),
+    breaks = x_vals
+  ) +
+  scale_y_continuous(
+    limits = c(0.3, 1),
+    breaks = c(0.5, 0.6, 0.75, 0.9, 0.98),
+    labels = c("0.50", "0.60", "0.75", "0.90", "0.98")
+  ) +
+  labs(
+    x = "Linear predictor",
+    y = "Accuracy"
+  ) +
   theme_minimal(base_size = 18) +
   theme(
     plot.title = element_text(face = "bold", color = "steelblue", size = 26),
@@ -596,8 +777,11 @@ ggplot(df_line, aes(x = x, y = y)) +
     axis.title.y = element_text(size = 22, margin = margin(r = 16)),
     axis.text = element_text(size = 15)
   )
-
 ```
+
+::: fragment
+![](images/hand.jpg){.absolute bottom=80 right=0 width="360" height="220"}
+:::
 
 # Conclusions
 
@@ -661,63 +845,71 @@ Micceri, T. (1989). The unicorn, the normal curve, and other improbable creature
 
 # Supplementary materials
 
-## Predictive check with `link="probit"`
+## Logit(accuracy) with `link=logit` 
 
-```{r sup1}
+```{r fitLogit-plot3}
 #| echo: false
 #| warning: false
 #| fig.align: center
 
-fitProbit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"),
-          weights= rep(k, nrow(d)))
+fitLogit <- glm(
+  accuracy ~ age * group,
+  data = d,
+  family = binomial(link = "logit"),
+  weights = rep(k, nrow(d))
+)
 
 eff <- data.frame(
   allEffects(
-    fitProbit,
+    fitLogit,
     xlevels = list(age = seq(min(d$age), max(d$age), .05))
   )[["age:group"]]
 )
-```
 
-```{r sup2}
-#| echo: false
-p_hat <- fitted(fitProbit)                      
-d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
-
-ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(
-    aes(y = pp_sim),
-    color = pal_predcheck["predicted"],
-    size = 3.5,
-    alpha = 0.4
-  ) +
-  geom_point(
-    color = pal_predcheck["observed"],
-    size = 1.3,
-    alpha = 0.6
-  ) +
+ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
   geom_line(
     data = eff,
-    aes(x = age, y = fit, group = group),
-    color = pal_predcheck["model"],
+    aes(x = age, y = qlogis(fit), color = group, group = group),
     linewidth = 2
   ) +
+  scale_color_manual(values = pal_lines) +
   xlab("Age") +
-  ylab("Accuracy") +
+  ylab("Logit(accuracy)") +
   theme_pres
+
 ```
 
-## `family=binomial(link="probit")`
+## Logit(accuracy) with `link=mafc.logit(.m=2)` 
 
-A **negative** interaction emerges
+```{r fitMint-plot22}
+#| echo: false
+#| fig.align: center
 
-```{r sup3}
-#| echo: true
-#| include: true
-#| warning: true
+fitM = glm(accuracy ~ age*group, data=d, family=binomial(link=mafc.logit(.m=2)), weights= rep(k, nrow(d)))
 
-fit = glm(accuracy ~ age*group, data=d, family=binomial(link="probit"), weights= rep(k, nrow(d)))
-summary(fit)
+eff <- data.frame(
+  allEffects(
+    fitM,
+    xlevels = list(age = seq(min(d$age), max(d$age), .05))
+  )[["age:group"]]
+)
+
+ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
+  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+  scale_color_manual(values = pal_points) +
+  new_scale_color() +
+  geom_line(
+    data = eff,
+    aes(x = age, y = qlogis(fit), color = group, group = group),
+    linewidth = 2
+  ) +
+  scale_color_manual(values = pal_lines) +
+  xlab("Age") +
+  ylab("Logit(accuracy)") +
+  theme_pres
+
 ```
-
 
