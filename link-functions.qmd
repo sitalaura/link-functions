@@ -51,14 +51,6 @@ style_output <- function(x, lines, class = "hg"){
 
 ```
 
-```{=html}
-<style>
-    .hg {
-        background-color: yellow;
-    }
-</style>
-```
-
 ## Our dataset
 
 - 1,000 subjects
@@ -716,7 +708,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 ## `link=mafc.logit(2)`
 
-Logit/probit on [*chance level*, 1] instead of [0,l]
+Logit/probit on [*chance level*, 1] instead of [0,1]
 
 ```{r macflink}
 #| echo: false
