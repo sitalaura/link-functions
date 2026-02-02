@@ -721,7 +721,7 @@ ggplot(df_line, aes(x = x, y = y)) +
 
 ## `link=mafc.logit(2)`
 
-Logit/probit on [*chance level*, 1] instead of [0,1]
+Logit on [*chance level*, 1] instead of [0,1]
 
 ```{r macflink}
 #| echo: false
