@@ -182,6 +182,9 @@ ggplot(d, aes(x = age, y = accuracy)) +
 ::: notes
 c'è un'interazione
 però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset These are one simulated dataset generated from the fitted model. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
+
+prende il modello come se fosse la vera data-generating process
+e simula cosa potresti osservare se rifacessi l’esperimento.
 :::
 
 ## Predictive check
@@ -534,23 +537,33 @@ p_left <- ggplot(d, aes(x = age, y = accuracy)) +
   theme(legend.position = "none")
 
 
-p_right <- ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
-  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+fam <- binomial(link = mafc.logit(2))
+
+p_right <- ggplot(d,
+  aes(x = age, y = fam$linkfun(pmin(pmax(accuracy, 0.501), 0.999)))) +
+  geom_point(aes(color = group), size = 1.6, alpha = 0.45) +
   scale_color_manual(values = pal_points) +
   new_scale_color() +
   geom_line(
     data = eff,
-    aes(x = age, y = qlogis(fit), color = group, group = group),
-    linewidth = 2
-  ) +
+    aes(x = age, y = fam$linkfun(pmin(pmax(fit, 0.501), 0.999)),
+      color = group,
+      group = group),
+    linewidth = 2) +
   scale_color_manual(values = pal_lines) +
+  coord_cartesian(ylim = c(-6, 6)) +
   xlab("Age") +
-  ylab("Logit(accuracy)") +
+  ylab("Logit(accuracy)*") +
   theme_pres
 
 p_left | p_right
 
 ```
+
+<div style="text-align:right; font-size:0.55em">
+  \* Logit(accuracy) with 0.5 as lower bound
+</div>
+
 
 ## `family=binomial(link=mafc.logit(.m=2))`
 
@@ -889,19 +902,27 @@ eff <- data.frame(
   )[["age:group"]]
 )
 
-ggplot(d, aes(x = age, y = qlogis(accuracy - 0.001))) +
-  geom_point(aes(color = group), size = 1.3, alpha = 0.6) +
+fam <- binomial(link = mafc.logit(2))
+
+ggplot(d,
+  aes(x = age, y = fam$linkfun(pmin(pmax(accuracy, 0.501), 0.999)))) +
+  geom_point(aes(color = group), size = 1.6, alpha = 0.45) +
   scale_color_manual(values = pal_points) +
   new_scale_color() +
   geom_line(
     data = eff,
-    aes(x = age, y = qlogis(fit), color = group, group = group),
-    linewidth = 2
-  ) +
+    aes(x = age, y = fam$linkfun(pmin(pmax(fit, 0.501), 0.999)),
+      color = group,
+      group = group),
+    linewidth = 2) +
   scale_color_manual(values = pal_lines) +
+  coord_cartesian(ylim = c(-6, 6)) +
   xlab("Age") +
-  ylab("Logit(accuracy)") +
+  ylab("Logit(accuracy)*") +
   theme_pres
 
 ```
 
+<div style="text-align:right; font-size:0.55em">
+  \* Logit(accuracy) with 0.5 as lower bound
+</div>
