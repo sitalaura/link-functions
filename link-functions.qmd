@@ -659,7 +659,7 @@ In our example the linear predictor is $\beta_0 + \beta_1 \cdot age + \beta_2 \c
 
 ## `link="logit"`
 
-Equal intervals on X correspond to equal ratios on Y **when on the logit scale**
+Equal intervals on X correspond to equal intervals on Y **when on the logit scale**
 
 ```{r loglink}
 #| echo: false
@@ -801,6 +801,8 @@ Predicted values remain within the outcome’s valid range
 :::
 
 ::: {.callout-tip title="Link function"}
+Different links change the outcome scale in different ways $\to$ estimated interactions change too
+
 Wrong links can create spurious interactions
 :::
 
