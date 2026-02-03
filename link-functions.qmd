@@ -182,6 +182,8 @@ ggplot(d, aes(x = age, y = accuracy)) +
 ```
 
 ::: notes
+link=identity significa che incremento unitario in x, costante in y
+
 c'è un'interazione
 però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset These are one simulated dataset generated from the fitted model. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
 
@@ -390,6 +392,11 @@ p_left | p_right
 ::: notes
 c'è un'interazione
 questo modello non sembra avere problemi
+
+cosa vuol dire cosa vuol dire applicare il link: trasformare da non lineare a lineare.
+
+per guardare l’interazione non posso guardare il grafico a sinistra, ma dal grafico a destra dove è avvuta la trasformazione che ho chieston al mio glm di fare, applicando il logit all'accuracy (facendo il logaritmo di eta): cosi ottengo y-trasformata, che va da -inf a +inf. quindi, una volta individuata la funzione di link, dobbiamo fare un passo indietro e applicare la funzione inversa: trasformiamo y in modo tale che vada da -inf a +inf e quindi possiamo osservare se le rette (che abbiamo quindi ottenuto linearizzando il fenomeno) sono parallele o meno. 
+ogni link esegue una trasformazione diversa. di conseguenza, link diverse linearizzano in modo diverso. solo la l'inversa della link corretta linearizza bene, mentre le inverse delle link sbagliate trovano interazioni spurie 
 :::
 
 ## `family=binomial(link="logit")`
@@ -940,3 +947,6 @@ ggplot(d,
 <div style="text-align:right; font-size:0.55em">
   \* Logit(accuracy) with 0.5 as lower bound
 </div>
+
+
+
