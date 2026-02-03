@@ -144,6 +144,8 @@ Key choices:
 
 ::: notes
 specifica che la scelta della link dipendende dalla family
+
+andiamo a vedere con un linear model (lm), quello che tutti facciamo sempre
 :::
 
 # Linear model
@@ -291,6 +293,46 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ```
 
+## Predictive check
+
+<span style="color:#a68efa;">New predicted values</span> fall within the valid range for accuracy [0,1]
+
+```{r fitLogit-pred}
+#| echo: false
+#| fig.align: center
+
+p_hat <- fitted(fitLogit)                      
+d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
+
+ggplot(d, aes(x = age, y = accuracy)) +
+  geom_point(
+    aes(y = pp_sim),
+    color = pal_predcheck["predicted"],
+    size = 2.5,
+    alpha = 0.4
+  ) +
+  geom_point(
+    color = pal_predcheck["observed"],
+    size = 1.3,
+    alpha = 0.6
+  ) +
+  geom_line(
+    data = eff,
+    aes(x = age, y = fit, group = group),
+    color = pal_predcheck["model"],
+    linewidth = 2
+  ) +
+  xlab("Age") +
+  ylab("Accuracy") +
+  theme_pres
+
+```
+
+::: notes
+ovvero predice dati all'interno dal range dei valori possibili
+anche qui andiamo a vedere il summary del modello
+:::
+
 ## `family=binomial(link="logit")`
 
 ```{r fitLogit-plot2}
@@ -350,46 +392,6 @@ c'è un'interazione
 questo modello non sembra avere problemi
 :::
 
-## Predictive check
-
-<span style="color:#a68efa;">New predicted values</span> fall within the valid range for accuracy [0,1]
-
-```{r fitLogit-pred}
-#| echo: false
-#| fig.align: center
-
-p_hat <- fitted(fitLogit)                      
-d$pp_sim <- rbinom(nrow(d), size = k, prob = p_hat) / k
-
-ggplot(d, aes(x = age, y = accuracy)) +
-  geom_point(
-    aes(y = pp_sim),
-    color = pal_predcheck["predicted"],
-    size = 2.5,
-    alpha = 0.4
-  ) +
-  geom_point(
-    color = pal_predcheck["observed"],
-    size = 1.3,
-    alpha = 0.6
-  ) +
-  geom_line(
-    data = eff,
-    aes(x = age, y = fit, group = group),
-    color = pal_predcheck["model"],
-    linewidth = 2
-  ) +
-  xlab("Age") +
-  ylab("Accuracy") +
-  theme_pres
-
-```
-
-::: notes
-ovvero predice dati all'interno dal range dei valori possibili
-anche qui andiamo a vedere il summary del modello
-:::
-
 ## `family=binomial(link="logit")`
 
 A **negative** interaction emerges
@@ -422,23 +424,7 @@ domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulat
 
 # The appropriate model
 
-## The dataset was actually simulated
-
-```{r datasim2}
-#| echo: true
-#| code-fold: true
-#| fig.align: center
-
-set.seed(123)
-
-k = 50
-N = 1000
-group = rbinom(N,1,.5)
-age = runif(N,6,10)
-eta = -6+1*age-1*group  # linear predictor
-probs = mafc.logit(.m = 2)$linkinv(eta)
-accuracy = rbinom(n = N, size = k, prob = probs) / k
-```
+## The dataset...
 
 ```{r datasim3}
 #| echo: false
@@ -459,11 +445,28 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   theme_pres
 ```
 
-::: fragment
+## ... was actually simulated
+
+```{r datasim22}
+#| echo: true
+#| eval: false
+#| fig.align: center
+#| code-line-numbers: "|7|"
+
+set.seed(123)
+
+k = 50
+N = 1000
+group = rbinom(N,1,.5)
+age = runif(N,6,10)
+eta = -6+1*age-1*group  # linear predictor
+probs = mafc.logit(.m = 2)$linkinv(eta)
+accuracy = rbinom(n = N, size = k, prob = probs) / k
+```
+
 No interaction was simulated
 
 <span style="color:#800000;"> Both models are detecting **an interaction that does not exist** </span>
-:::
 
 ::: notes
 sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica? risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0% pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. il link in questione si chiama e ve lo mostro nel modello
@@ -505,6 +508,10 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ::: fragment
 ![](images/hand.jpg){.absolute bottom=60 right=0 width="360" height="220"}
+:::
+
+::: notes
+se uno fa il task da blind, allora la sua accuratezza è 0.5 LOWER LIMIT DELL’ACCURACY E’ 0.5 E NON 0
 :::
 
 ## `family=binomial(link=mafc.logit(.m=2))`
@@ -767,8 +774,8 @@ ggplot(df_line, aes(x = x, y = y)) +
   ) +
   scale_y_continuous(
     limits = c(0, 1),
-    breaks = c(0, 0.25, 0.5, 0.6, 0.75, 0.9, 0.98, 1),
-    labels = c("0.00", "0.25", "0.50", "0.60", "0.75", "0.90", "0.98", "1.00")
+    breaks = c(0, 0.25, 0.5, 0.6, 0.75, 0.9, 1),
+    labels = c("0.00", "0.25", "0.50", "0.60", "0.75", "0.90", "1.00")
   ) +
   labs(
     x = "Linear predictor",
@@ -814,6 +821,10 @@ How often
 - inappropriate link functions are used when testing interactions?
 
 - do they lead to significant results?
+
+::: notes
+accennare a suggerimenti per scelta link nel nostro lavoro 
+:::
 
 ## Materials & Contact
 
