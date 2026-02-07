@@ -124,12 +124,6 @@ ggplot(d, aes(x = age, y = accuracy, color = group)) +
   theme_pres
 ```
 
-::: notes
-ogni puntino = un bambino
-asse x: età 
-asse y: quante risposte corrette dà / 50 domande vero-falso
-:::
-
 ## Building the model
 
 Key choices:
@@ -141,12 +135,6 @@ Key choices:
 - **<span style="color:#800000;">link function</span>**
   <br> maps the linear predictor  $\beta_0 + \beta_1 \cdot age + \beta_2 \cdot group$  
   onto the scale of the response variable $Y$
-
-::: notes
-specifica che la scelta della link dipendende dalla family
-
-andiamo a vedere con un linear model (lm), quello che tutti facciamo sempre
-:::
 
 # Linear model
 
@@ -180,16 +168,6 @@ ggplot(d, aes(x = age, y = accuracy)) +
   theme_pres
 
 ```
-
-::: notes
-link=identity significa che incremento unitario in x, costante in y
-
-c'è un'interazione
-però mi chiedo.. questo modello ci aiuta a predire i dati? per rispondere alla domanda usiamo questo trick: usiamo il modello costruito per creare un nuovo dataset These are one simulated dataset generated from the fitted model. se il nuovo dataset somiglia ai dati che già possediamo, allora la risposta è "si, il modello ci aiuta a predire nuovi dati". se invece il dataset nuovo, che apparirà sotto forma di puntini viola (i nuovi dati) è diverso dal precedente, allora "no, il modello che ho costruito non predice bene nuovi dati, a partire da quelli di cui dispongo (simulati, come in questo caso, o osservati)"
-
-prende il modello come se fosse la vera data-generating process
-e simula cosa potresti osservare se rifacessi l’esperimento.
-:::
 
 ## Predictive check
 
@@ -225,11 +203,6 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ```
 
-::: notes
-il modello predice dati fuori dal range dei valori possibili
-per curiosità, andiamo comunque a vedere il summary del modello
-:::
-
 ## `family=gaussian(link="identity")`
 
 A **positive** interaction emerges
@@ -256,10 +229,6 @@ hl <- grep("age:group", ss)
 style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
 
 ```
-
-::: notes
-CHIEDI: quindi che modello possiamo fare?
-:::
 
 # Logistic regression model
 
@@ -330,11 +299,6 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ```
 
-::: notes
-ovvero predice dati all'interno dal range dei valori possibili
-anche qui andiamo a vedere il summary del modello
-:::
-
 ## `family=binomial(link="logit")`
 
 ```{r fitLogit-plot2}
@@ -389,16 +353,6 @@ p_left | p_right
 
 ```
 
-::: notes
-c'è un'interazione
-questo modello non sembra avere problemi
-
-cosa vuol dire cosa vuol dire applicare il link: trasformare da non lineare a lineare.
-
-per guardare l’interazione non posso guardare il grafico a sinistra, ma dal grafico a destra dove è avvuta la trasformazione che ho chieston al mio glm di fare, applicando il logit all'accuracy (facendo il logaritmo di eta): cosi ottengo y-trasformata, che va da -inf a +inf. quindi, una volta individuata la funzione di link, dobbiamo fare un passo indietro e applicare la funzione inversa: trasformiamo y in modo tale che vada da -inf a +inf e quindi possiamo osservare se le rette (che abbiamo quindi ottenuto linearizzando il fenomeno) sono parallele o meno. 
-ogni link esegue una trasformazione diversa. di conseguenza, link diverse linearizzano in modo diverso. solo la l'inversa della link corretta linearizza bene, mentre le inverse delle link sbagliate trovano interazioni spurie 
-:::
-
 ## `family=binomial(link="logit")`
 
 A **negative** interaction emerges
@@ -425,13 +379,9 @@ hl <- grep("age:group", ss)
 style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
 ```
 
-::: notes
-domanda (per alzata di mano): quale dei due modelli riflette ciò che ho simulato? o nessuno dei due? ---E IMPORTANTE--- riformula la domanda: in termini dell'esempio tipo all'aumentare dell'età,... e perché? ho già dato un hint dicendo che il primo modello in realtà ha un problema.. 
-:::
-
 # The appropriate model
 
-## The dataset...
+## The dataset ...
 
 ```{r datasim3}
 #| echo: false
@@ -475,10 +425,6 @@ No interaction was simulated
 
 <span style="color:#800000;"> Both models are detecting **an interaction that does not exist** </span>
 
-::: notes
-sappiamo perché il modello lineare non funziona (da prima). ma perché non anche il modello di regressione logistica? risposta: perché se tiro TUTTO a caso in un compito vero/falso di cui non si sa nulla del contenuto, allora l'accuratezza è del 50% non 0%! la regrssione logistica invece dice proprio questo: accuratezza dello 0% pertanto, anche se la family è giusta (perché ci permette di predire sempre valori che spannano tra 0 e 1), dobbiamo usare un link diverso, che tenga conto di sta cosa. il link in questione si chiama e ve lo mostro nel modello
-:::
-
 ## `family=binomial(link=mafc.logit(.m=2))`
 
 To account for the 50\% chance level in a TRUE/FALSE task:
@@ -515,10 +461,6 @@ ggplot(d, aes(x = age, y = accuracy)) +
 
 ::: fragment
 ![](images/hand.jpg){.absolute bottom=60 right=0 width="360" height="220"}
-:::
-
-::: notes
-se uno fa il task da blind, allora la sua accuratezza è 0.5 LOWER LIMIT DELL’ACCURACY E’ 0.5 E NON 0
 :::
 
 ## `family=binomial(link=mafc.logit(.m=2))`
@@ -578,7 +520,6 @@ p_left | p_right
   \* Logit(accuracy) with 0.5 as lower bound
 </div>
 
-
 ## `family=binomial(link=mafc.logit(.m=2))`
 
 No interaction emerges, in line with how the data were generated
@@ -608,10 +549,6 @@ style_output(cat(ss, sep = "\n"), lines = hl, class = "hg")
 
 
 # Why interactions
-
-::: notes
-noi testiamo di solito effetti lineari (quasi mai non lineari), mentre le interazioni le vai a vedere quasi sempre (i software tipo spss li mostrano) ed è un tipo di non linearità che viene testato quasi non intenzionalmente. pertanto il ricercatore testa effetti non lineari (interazioni) col link sbagliato (risentendo del problema delle trasformazioni di differenze) 
-:::
 
 ## `link="identity"`
 
@@ -828,10 +765,6 @@ How often
 - inappropriate link functions are used when testing interactions?
 
 - do they lead to significant results?
-
-::: notes
-accennare a suggerimenti per scelta link nel nostro lavoro 
-:::
 
 ## Materials & Contact
 
