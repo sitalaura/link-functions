@@ -1,5 +1,5 @@
 ---
-title: "Additional results from the Systematic Review"
+title: "Additional Results from the Systematic Review"
 subtitle: "Are we getting interactions wrong? The role of link functions in psychological research"
 author: "Margherita Calderan, Filippo Gambarota, Laura Sità, Tommaso Feraco, Enrico Toffalini"
 format:
