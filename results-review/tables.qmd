@@ -197,16 +197,16 @@ print_table_if_exists(
 | Finds significant interactions | Whether at least one interaction, among those where the link was coded as incorrectly identity, yields a statistically significant result, or is considered and discussed analogously in non-frequentist analyses. | Boolean |
 | Response variable types | Non-exclusive list of response-variable types on which interactions are tested (for example, sum score, accuracy, error count, response times, ordinal/Likert). | Category |
 
-## Table 3: By-journal descriptives {.table-heading}
+## Table 3: Interrater agreement {.table-heading}
 
 ```{r}
-#| label: by-journal
+#| label: agreement
 #| results: asis
 
 print_table_if_exists(
-  note_if_missing = "By-journal table not available in this build.",
-  "tables", "review-by-journal.csv",
-  transform = compact_by_journal
+  note_if_missing = "Interrater agreement table not available in this build.",
+  "tables", "review-intercoder-agreement.csv",
+  transform = compact_agreement
 )
 ```
 
