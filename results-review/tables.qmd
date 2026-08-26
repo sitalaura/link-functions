@@ -1,0 +1,49 @@
+---
+title: "Additional results from the Systematic Review"
+subtitle: "Are we getting interactions wrong? The role of link functions in psychological research"
+author: "Margherita Calderan, Filippo Gambarota, Laura Sità, Tommaso Feraco, Enrico Toffalini"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "Contents"
+    smooth-scroll: true
+    embed-resources: true
+    link-external-newwindow: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## About this page
+
+This page provides additional tables and results complementing the poster presented at the 2026 conference of the European Mathematical Psychology Group.
+
+The materials below are drawn from a manuscript currently in preparation and not yet submitted for peer review and report additional results that could not be included in the poster due to space limitations.
+
+## Table 1: titolo della prima tabella
+
+Inserire qui la prima tabella.
+
+## Table 2: titolo della seconda tabella
+
+Inserire qui la seconda tabella.
+
+## Table 3: titolo della terza tabella
+
+Inserire qui la terza tabella.
+
+## Additional materials
+
+- [View the presentation for the Cognitive Science Arena](https://sitalaura.github.io/link-functions/link-functions.html)
+- [View the preregistration on OSF](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215)
+
+## Contact
+
+For questions about the study, please contact:
+
+**Laura Sità**  
+[laura.sita@studenti.unipd.it](mailto:laura.sita@studenti.unipd.it) <br>
+Department of General Psychology  
+University of Padova
