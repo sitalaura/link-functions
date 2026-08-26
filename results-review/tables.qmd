@@ -16,23 +16,199 @@ execute:
   message: false
 ---
 
+<style>
+.table-heading {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+</style>
+
 ## About this page
 
 This page provides additional tables and results complementing the poster presented at the 2026 conference of the European Mathematical Psychology Group.
 
 The materials below are drawn from a manuscript currently in preparation and not yet submitted for peer review and report additional results that could not be included in the poster due to space limitations.
 
-## Table 1: titolo della prima tabella
+```{r}
+#| label: setup
+#| include: false
 
-Inserire qui la prima tabella.
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  comment = "#>"
+)
 
-## Table 2: titolo della seconda tabella
+# This supplement reads a few already-generated result files so that the
+# printed tables reproduce exactly. The reader does not need any of these
+# files: every table below degrades to a short note if its source is absent,
+# and the text never asks the reader to open a repository file.
+find_file <- function(...) {
+  rel <- file.path(...)
+  candidates <- c(rel, file.path("..", rel))
+  hit <- candidates[file.exists(candidates)]
+  if (length(hit) == 0) return(NA_character_)
+  hit[1]
+}
 
-Inserire qui la seconda tabella.
+read_csv_if_exists <- function(...) {
+  path <- find_file(...)
+  if (is.na(path)) return(NULL)
+  read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
+}
 
-## Table 3: titolo della terza tabella
+missing_note <- function(text) {
+  cat("*", text, "*\n\n", sep = "")
+  invisible(NULL)
+}
 
-Inserire qui la terza tabella.
+zap0 <- function(x, tol = 1e-8) {
+  x <- as.numeric(x)
+  x[!is.na(x) & abs(x) < tol] <- 0
+  x
+}
+
+fmt_num <- function(x, digits = 3) {
+  ifelse(is.na(x), "--", formatC(zap0(as.numeric(x)), format = "f", digits = digits))
+}
+
+fmt_percent <- function(x, digits = 1) {
+  ifelse(is.na(x), "--", paste0(formatC(as.numeric(x), format = "f", digits = digits), "%"))
+}
+
+fmt_rate <- function(x, digits = 1) {
+  ifelse(is.na(x), "--", paste0(formatC(100 * as.numeric(x), format = "f", digits = digits), "%"))
+}
+
+fmt_rate_ci <- function(rate, low, high, digits = 1) {
+  ifelse(
+    is.na(rate),
+    "--",
+    paste0(
+      fmt_rate(rate, digits),
+      " [", formatC(100 * as.numeric(low), format = "f", digits = digits),
+      ", ", formatC(100 * as.numeric(high), format = "f", digits = digits), "]"
+    )
+  )
+}
+
+short_journal <- function(x) {
+  x <- gsub("Journal of Experimental Psychology: General", "JEP: General", x, fixed = TRUE)
+  x <- gsub("Journal of Personality and Social Psychology", "JPSP", x, fixed = TRUE)
+  x
+}
+
+short_item <- function(x) {
+  out <- x
+  out[grepl("non-identity", out, ignore.case = TRUE)] <- "Uses non-identity link"
+  out[grepl("Explicit link", out, ignore.case = TRUE)] <- "Explicit link reported"
+  out[grepl("incorrect", out, ignore.case = TRUE)] <- "Identity link flagged"
+  out[grepl("significant", out, ignore.case = TRUE)] <- "Significant flagged interaction"
+  out
+}
+
+print_table_if_exists <- function(note_if_missing, ..., transform = identity, digits = 3) {
+  d <- read_csv_if_exists(...)
+  if (is.null(d)) return(missing_note(note_if_missing))
+  d <- transform(d)
+  print(knitr::kable(d, digits = digits))
+  cat("\n\n")
+  invisible(d)
+}
+
+include_graphic_if_exists <- function(..., note_if_missing = NULL) {
+  path <- find_file(...)
+  if (!is.na(path) && grepl("\\.pdf$", path) && !knitr::is_latex_output()) {
+    png_alt <- sub("\\.pdf$", ".png", path)
+    path <- if (file.exists(png_alt)) png_alt else NA_character_
+  }
+  if (is.na(path)) {
+    if (is.null(note_if_missing)) note_if_missing <- "Figure not available in this build."
+    return(missing_note(note_if_missing))
+  }
+  knitr::include_graphics(path)
+}
+
+compact_agreement <- function(d) {
+  label <- if ("label" %in% names(d)) d$label else d$variable
+  data.frame(
+    Item = short_item(label),
+    N = d$n_double_coded,
+    Agreement = fmt_rate(d$agreement),
+    Kappa = fmt_num(d$kappa, 2),
+    `Coder 1 yes` = fmt_percent(d$coder1_yes_percent),
+    `Coder 2 yes` = fmt_percent(d$coder2_yes_percent),
+    check.names = FALSE
+  )
+}
+
+compact_by_journal <- function(d) {
+  data.frame(
+    Journal = short_journal(d$journal),
+    `Eligible` = d$eligible_n,
+    `Interaction` = d$interaction_testing_n,
+    `Interaction / eligible` = fmt_percent(d$interaction_testing_percent_of_eligible),
+    `Non-identity link` = fmt_percent(d$non_identity_link_percent_interaction),
+    `Explicit link` = fmt_percent(d$explicit_link_percent_interaction),
+    `Identity flagged` = fmt_percent(d$incorrect_identity_percent_interaction),
+    check.names = FALSE
+  )
+}
+```
+
+## Table 1: Screening flow {.table-heading}
+
+```{r}
+#| label: screening-flow
+#| results: asis
+
+print_table_if_exists(
+  note_if_missing = "Screening-flow table not available in this build.",
+  "tables", "review-screening-flow.csv",
+  transform = function(d) {
+    required <- c("step", "n")
+    missing <- setdiff(required, names(d))
+    if (length(missing) > 0) {
+      stop("Screening-flow table is missing required columns: ", paste(missing, collapse = ", "), call. = FALSE)
+    }
+    out <- data.frame(
+      Step = d$step,
+      N = d$n,
+      check.names = FALSE
+    )
+    optional_cols <- setdiff(names(d), c("step", "n"))
+    for (col in optional_cols) {
+      out[[col]] <- d[[col]]
+    }
+    out
+  }
+)
+```
+
+## Table 2: Coded variables and their preregistered definitions {.table-heading}
+
+| Variable | Definition (preregistered) | Type |
+|---|-------------|---|
+| Tests interactions | Whether the article tests at least one interaction term in a statistical model or using an ANOVA. | Boolean |
+| Uses non identity link function | Whether at least one tested interaction is presumably analyzed with a non-identity link function (for example, because a generalized linear model was used). | Boolean |
+| Explicit link function | Whether the link function is explicitly declared for at least one statistical model in the article. Indicating only which generalized linear model or family was used is not enough. | Boolean |
+| Incorrect identity link function | Whether at least one tested interaction is analyzed using an identity link function when another, non-identity link function would be more appropriate. | Boolean |
+| Finds significant interactions | Whether at least one interaction, among those where the link was coded as incorrectly identity, yields a statistically significant result, or is considered and discussed analogously in non-frequentist analyses. | Boolean |
+| Response variable types | Non-exclusive list of response-variable types on which interactions are tested (for example, sum score, accuracy, error count, response times, ordinal/Likert). | Category |
+
+## Table 3: By-journal descriptives {.table-heading}
+
+```{r}
+#| label: by-journal
+#| results: asis
+
+print_table_if_exists(
+  note_if_missing = "By-journal table not available in this build.",
+  "tables", "review-by-journal.csv",
+  transform = compact_by_journal
+)
+```
 
 ## Additional materials
 
