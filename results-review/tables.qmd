@@ -257,6 +257,19 @@ print_table_if_exists(
 )
 ```
 
+## Table 7: By-journal descriptives {.table-heading}
+
+```{r}
+#| label: by-journal
+#| results: asis
+
+print_table_if_exists(
+  note_if_missing = "By-journal table not available in this build.",
+  "tables", "review-by-journal.csv",
+  transform = compact_by_journal
+)
+```
+
 ## Additional materials
 
 - [View the presentation for the Cognitive Science Arena](https://sitalaura.github.io/link-functions/link-functions.html)
