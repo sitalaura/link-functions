@@ -2146,11 +2146,20 @@ vertical-align: -.125em;
    
   <ul>
   <li><a href="#about-this-page" id="toc-about-this-page" class="nav-link active" data-scroll-target="#about-this-page">About this page</a></li>
+  <li><a href="#review-method" id="toc-review-method" class="nav-link" data-scroll-target="#review-method">Review Method</a>
+  <ul class="collapse">
   <li><a href="#table-1-screening-flow" id="toc-table-1-screening-flow" class="nav-link" data-scroll-target="#table-1-screening-flow">Table 1: Screening flow</a></li>
   <li><a href="#table-2-coded-variables-and-their-preregistered-definitions" id="toc-table-2-coded-variables-and-their-preregistered-definitions" class="nav-link" data-scroll-target="#table-2-coded-variables-and-their-preregistered-definitions">Table 2: Coded variables and their preregistered definitions</a></li>
-  <li><a href="#table-3-interrater-agreement" id="toc-table-3-interrater-agreement" class="nav-link" data-scroll-target="#table-3-interrater-agreement">Table 3: Interrater agreement</a></li>
+  <li><a href="#table-3-operational-rules" id="toc-table-3-operational-rules" class="nav-link" data-scroll-target="#table-3-operational-rules">Table 3: Operational rules</a></li>
+  </ul></li>
+  <li><a href="#review-findings" id="toc-review-findings" class="nav-link" data-scroll-target="#review-findings">Review Findings</a>
+  <ul class="collapse">
+  <li><a href="#table-4-descriptive-summary" id="toc-table-4-descriptive-summary" class="nav-link" data-scroll-target="#table-4-descriptive-summary">Table 4: Descriptive summary</a></li>
+  <li><a href="#table-5-outcome-types" id="toc-table-5-outcome-types" class="nav-link" data-scroll-target="#table-5-outcome-types">Table 5: Outcome types</a></li>
+  <li><a href="#table-6-interrater-agreement" id="toc-table-6-interrater-agreement" class="nav-link" data-scroll-target="#table-6-interrater-agreement">Table 6: Interrater agreement</a></li>
   <li><a href="#additional-materials" id="toc-additional-materials" class="nav-link" data-scroll-target="#additional-materials">Additional materials</a></li>
   <li><a href="#contact" id="toc-contact" class="nav-link" data-scroll-target="#contact">Contact</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2193,6 +2202,8 @@ padding-bottom: 0;
 <p>This page provides additional tables and results complementing the poster presented at the 2026 conference of the European Mathematical Psychology Group.</p>
 <p>The materials below are drawn from a manuscript currently in preparation and not yet submitted for peer review and report additional results that could not be included in the poster due to space limitations.</p>
 </section>
+<section id="review-method" class="level1">
+<h1>Review Method</h1>
 <section id="table-1-screening-flow" class="level2 table-heading">
 <h2 class="table-heading anchored" data-anchor-id="table-1-screening-flow">Table 1: Screening flow</h2>
 <table class="caption-top table">
@@ -2286,8 +2297,208 @@ padding-bottom: 0;
 </tbody>
 </table>
 </section>
-<section id="table-3-interrater-agreement" class="level2 table-heading">
-<h2 class="table-heading anchored" data-anchor-id="table-3-interrater-agreement">Table 3: Interrater agreement</h2>
+<section id="table-3-operational-rules" class="level2 table-heading">
+<h2 class="table-heading anchored" data-anchor-id="table-3-operational-rules">Table 3: Operational rules</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Coded “Yes” when</th>
+<th>Decisions that most affect the count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Non-identity link used</td>
+<td>at least one tested interaction is fitted with a model implying a non-identity link, that is, any GLM or GLMM beyond the Gaussian-identity default (ANOVA, ordinary regression, linear mixed model).</td>
+<td>A model named “logistic”, “probit”, “Poisson”, “negative binomial”, “ordinal”/“cumulative”, or “Gamma” regression implies a non-identity link.</td>
+</tr>
+<tr class="even">
+<td>Explicit link function</td>
+<td>the link is identifiable from the report, either stated in words or named through a link-specific model.</td>
+<td>“Logistic regression” (logit), “probit regression” (probit), and “Poisson” or “log-linear” (log) count as explicit. Naming only a family, a “generalized linear model”, or a “GLMM” does not.</td>
+</tr>
+<tr class="odd">
+<td>Formally incorrect identity-link analysis</td>
+<td>an interaction is tested with an identity-link model (ANOVA, ordinary regression, linear mixed model, or a test on cell means) applied to an outcome with formal constraints: bounded, discrete, positive-only, or with a known chance level.</td>
+<td>Flagged only when the constraint is clear from the report. Not flagged when the analysis is explicitly justified as an observed-score estimand, or when the outcome is plausibly continuous and far from any bound.</td>
+</tr>
+<tr class="even">
+<td>Significant interaction</td>
+<td>at least one interaction already flagged as incorrect identity-link is reported as statistically significant, or is interpreted analogously (for example, a credible interval excluding zero) in a Bayesian analysis.</td>
+<td>Restricted to interactions already flagged in the row above.</td>
+</tr>
+<tr class="odd">
+<td>Response-variable types</td>
+<td>—</td>
+<td>Non-exclusive: one article can contribute several types (sum score, accuracy or proportion, error count, response time, ordinal/Likert, neural or physiological, difference score, correlation).</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="review-findings" class="level1">
+<h1>Review Findings</h1>
+<section id="table-4-descriptive-summary" class="level2 table-heading">
+<h2 class="table-heading anchored" data-anchor-id="table-4-descriptive-summary">Table 4: Descriptive summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 59%">
+<col style="width: 2%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 4%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">row_id</th>
+<th style="text-align: left;">quantity</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">denominator_n</th>
+<th style="text-align: right;">percent</th>
+<th style="text-align: right;">ci_low</th>
+<th style="text-align: right;">ci_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">eligible_empirical</td>
+<td style="text-align: left;">Eligible empirical articles</td>
+<td style="text-align: right;">331</td>
+<td style="text-align: right;">331</td>
+<td style="text-align: right;">100.0</td>
+<td style="text-align: right;">98.9</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">testing_interactions</td>
+<td style="text-align: left;">Eligible empirical articles testing at least one interaction</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">331</td>
+<td style="text-align: right;">60.4</td>
+<td style="text-align: right;">55.1</td>
+<td style="text-align: right;">65.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">non_identity_link</td>
+<td style="text-align: left;">Interaction-testing articles using at least one non-identity link</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">29.0</td>
+<td style="text-align: right;">23.2</td>
+<td style="text-align: right;">35.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">explicit_link</td>
+<td style="text-align: left;">Interaction-testing articles explicitly reporting the link function</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">23.0</td>
+<td style="text-align: right;">17.7</td>
+<td style="text-align: right;">29.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">incorrect_identity</td>
+<td style="text-align: left;">Interaction-testing articles with formally incorrect identity-link analyses of constrained observed outcomes</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">72.0</td>
+<td style="text-align: right;">65.4</td>
+<td style="text-align: right;">77.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">significant_incorrect_identity</td>
+<td style="text-align: left;">Formally incorrect identity-link cases with at least one significant interaction</td>
+<td style="text-align: right;">124</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">86.1</td>
+<td style="text-align: right;">79.5</td>
+<td style="text-align: right;">90.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">eligible_not_testing_interactions</td>
+<td style="text-align: left;">Eligible empirical articles not testing interactions</td>
+<td style="text-align: right;">131</td>
+<td style="text-align: right;">331</td>
+<td style="text-align: right;">39.6</td>
+<td style="text-align: right;">34.5</td>
+<td style="text-align: right;">44.9</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="table-5-outcome-types" class="level2 table-heading">
+<h2 class="table-heading anchored" data-anchor-id="table-5-outcome-types">Table 5: Outcome types</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Outcome type</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">Denominator</th>
+<th style="text-align: left;">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Binary / accuracy / proportions</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">42.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sum scores / composites</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">33.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ordinal / Likert / ratings</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">18.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Response times / durations</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">15.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Counts / error counts</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">4.5%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Neural / physiological measures</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">11.5%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Correlations / associations</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">4.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Difference / distance scores</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">8.5%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="table-6-interrater-agreement" class="level2 table-heading">
+<h2 class="table-heading anchored" data-anchor-id="table-6-interrater-agreement">Table 6: Interrater agreement</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 42%">
@@ -2356,6 +2567,7 @@ padding-bottom: 0;
 <p><strong>Laura Sità</strong><br>
 <a href="mailto:laura.sita@studenti.unipd.it">laura.sita@studenti.unipd.it</a> <br> Department of General Psychology<br>
 University of Padova</p>
+</section>
 </section>
 
 </main>

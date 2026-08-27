@@ -157,6 +157,8 @@ compact_by_journal <- function(d) {
 }
 ```
 
+# Review Method
+
 ## Table 1: Screening flow {.table-heading}
 
 ```{r}
@@ -197,7 +199,52 @@ print_table_if_exists(
 | Finds significant interactions | Whether at least one interaction, among those where the link was coded as incorrectly identity, yields a statistically significant result, or is considered and discussed analogously in non-frequentist analyses. | Boolean |
 | Response variable types | Non-exclusive list of response-variable types on which interactions are tested (for example, sum score, accuracy, error count, response times, ordinal/Likert). | Category |
 
-## Table 3: Interrater agreement {.table-heading}
+## Table 3: Operational rules {.table-heading}
+
+| Variable | Coded "Yes" when | Decisions that most affect the count |
+|---|------------|------------|
+| Non-identity link used | at least one tested interaction is fitted with a model implying a non-identity link, that is, any GLM or GLMM beyond the Gaussian-identity default (ANOVA, ordinary regression, linear mixed model). | A model named "logistic", "probit", "Poisson", "negative binomial", "ordinal"/"cumulative", or "Gamma" regression implies a non-identity link. |
+| Explicit link function | the link is identifiable from the report, either stated in words or named through a link-specific model. | "Logistic regression" (logit), "probit regression" (probit), and "Poisson" or "log-linear" (log) count as explicit. Naming only a family, a "generalized linear model", or a "GLMM" does not. |
+| Formally incorrect identity-link analysis | an interaction is tested with an identity-link model (ANOVA, ordinary regression, linear mixed model, or a test on cell means) applied to an outcome with formal constraints: bounded, discrete, positive-only, or with a known chance level. | Flagged only when the constraint is clear from the report. Not flagged when the analysis is explicitly justified as an observed-score estimand, or when the outcome is plausibly continuous and far from any bound. |
+| Significant interaction | at least one interaction already flagged as incorrect identity-link is reported as statistically significant, or is interpreted analogously (for example, a credible interval excluding zero) in a Bayesian analysis. | Restricted to interactions already flagged in the row above. |
+| Response-variable types | — | Non-exclusive: one article can contribute several types (sum score, accuracy or proportion, error count, response time, ordinal/Likert, neural or physiological, difference score, correlation). |
+
+# Review Findings
+
+## Table 4: Descriptive summary {.table-heading}
+
+```{r}
+#| label: current-practice
+#| results: asis
+
+print_table_if_exists(
+  note_if_missing = "Review summary table not available in this build.",
+  "tables", "review-summary.csv"
+)
+```
+
+## Table 5: Outcome types {.table-heading}
+
+```{r}
+#| label: outcome-types
+#| results: asis
+
+print_table_if_exists(
+  note_if_missing = "Outcome-type table not available in this build.",
+  "tables", "review-outcome-types.csv",
+  transform = function(d) {
+    data.frame(
+      `Outcome type` = d$outcome_type,
+      N = d$n,
+      Denominator = d$denominator_n,
+      `%` = paste0(fmt_num(d$percent, 1), "%"),
+      check.names = FALSE
+    )
+  }
+)
+```
+
+## Table 6: Interrater agreement {.table-heading}
 
 ```{r}
 #| label: agreement
