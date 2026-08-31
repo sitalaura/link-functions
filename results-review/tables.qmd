@@ -21,6 +21,10 @@ execute:
   border-bottom: none;
   padding-bottom: 0;
 }
+
+.protocol-box .callout-body {
+  text-align: center;
+}
 </style>
 
 ## About this page
@@ -158,6 +162,29 @@ compact_by_journal <- function(d) {
 ```
 
 # Review Method
+
+## Sampling procedure
+
+::: {.callout-note .protocol-box appearance="simple" icon=false}
+**5 psychology journals**, 
+<br> representing general, experimental, social, developmental and clinical psychology
+
+↓
+
+All articles **published in 2024** were retrieved from **Scopus**
+
+↓
+
+Articles were screened in a randomized order within each journal
+
+↓
+
+**40 eligible interaction-testing articles per journal**
+
+↓
+
+**200 articles included in the final review**
+:::
 
 ## Table 1: Screening flow {.table-heading}
 
