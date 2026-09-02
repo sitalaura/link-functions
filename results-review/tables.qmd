@@ -300,7 +300,7 @@ print_table_if_exists(
 ## Additional materials
 
 - [View the presentation for the Cognitive Science Arena](https://sitalaura.github.io/link-functions/link-functions.html)
-- [View the preregistration on OSF](https://osf.io/tpjax/overview?view_only=7feccf54ff484fe093cf65579617b215)
+- [View the entire research compendium](https://enricotoffalini.github.io/Most_interactions_are_wrong/)
 
 ## Contact
 
